@@ -214,10 +214,10 @@ class _BottomNavPage extends State<BottomNavPage>
           controller: pageController,
           onPageChanged: onPageChanged,
           children: <Widget>[
-            HomePage(),
-            Watchlist(),
-            Notifications(),
-            Settings(),
+            HomePage(key: UniqueKey()),
+            Watchlist(key: UniqueKey()),
+            Notifications(key: UniqueKey()),
+            Settings(key: UniqueKey()),
           ]),
     );
   }

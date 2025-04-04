@@ -23,19 +23,19 @@ import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Settings extends StatefulWidget {
-  const Settings({Key key}) : super(key: key);
+  const Settings({required Key key}) : super(key: key);
 
   @override
   _SettingsState createState() => _SettingsState();
 }
 String userName=''; String locationDetails="", notifications=""; bool isAnonymous = false; var lastFeedbackTime="";
-int offlineListCount = 0; var storedValues; bool   profileLoading;
+int offlineListCount = 0; var storedValues; bool profileLoading = false;
 
 class _SettingsState extends State<Settings>  with SingleTickerProviderStateMixin {
 
-  AnimationController animationController;
-  Animation<double> animation;
-  Animation<double> sizeAnimation;
+  late AnimationController animationController;
+  late Animation<double> animation;
+  late Animation<double> sizeAnimation;
 
   bool isLoading = false;
  @override
@@ -143,7 +143,7 @@ class _SettingsState extends State<Settings>  with SingleTickerProviderStateMixi
   }
 
   Future<void>getAnonymity() async{
-    isAnonymous = await LocalPrefManager.getAnonymity();
+    isAnonymous = (await LocalPrefManager.getAnonymity())!;
 
   }
 
@@ -419,7 +419,7 @@ class _SettingsState extends State<Settings>  with SingleTickerProviderStateMixi
 
      CustomResponse response = await ApiCall.makeGetRequestToken("devicetoken/removeuser");
 
-     CustomResponse response1 = await ApiCall.makePostRequestToken("user/removeaccount");
+     CustomResponse response1 = await ApiCall.makePostRequestToken("user/removeaccount", paramsData: {});
     if(response.status == 200 && response1.status == 200){
       if(json.decode(response.body)["status"]){
           ApiCall.clearLocalStorage();
@@ -436,10 +436,10 @@ class _SettingsState extends State<Settings>  with SingleTickerProviderStateMixi
 
 
   void _onShareTap() {
-    final RenderBox box = context.findRenderObject();
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
     var text = "Hey! I am using the Save Trees app to monitor trees around me and to get support for saving trees."
         "\n\nPlease download the app from the link below. The next time you want to save a tree, just post it on this app. ";
-    Share.share(text+ "\n" + ApiCall.playStoreUrl, sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
+    Share.share(text+ "\n" + ApiCall.playStoreUrl, sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size);
   }
 
   @override

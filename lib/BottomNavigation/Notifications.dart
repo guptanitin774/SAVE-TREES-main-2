@@ -19,7 +19,7 @@ import 'package:naturesociety_new/Widgets/Redux.dart';
 
 class Notifications extends StatefulWidget
 {
-  const Notifications({Key key}) : super(key: key);
+  const Notifications({required Key key}) : super(key: key);
   @override
   _Notifications createState() => _Notifications();
 }
@@ -35,7 +35,7 @@ class _Notifications extends State<Notifications> {
   }
   final fln = FlutterLocalNotificationsPlugin();
 
-  Future<void> getFullNotificationsList({@required bool updateCount}) async{
+  Future<void> getFullNotificationsList({required bool updateCount}) async{
     fln.cancelAll();
    if(updateCount == null )
      updateCount = true;
@@ -134,7 +134,7 @@ class _Notifications extends State<Notifications> {
          body: isConnected? SafeArea(
            child: !isLoading ? mainScreen(context) : ShimmerLoading.listShimmerLoading(context),
          ): NoConnection(
-           notifyParent: getFullNotificationsList,
+           notifyParent: () => getFullNotificationsList(updateCount: true), key: UniqueKey(),
          ),
        ),
      );

@@ -71,7 +71,7 @@ class _UserPostedCaseDetails extends State<UserPostedCaseDetails> {
             photos: json.decode(response.body)["data"][i]["photos"],
             userDetails: json.decode(response.body)["data"][i]["addedby"],
             createdDate: json.decode(response.body)["data"][i]["createddate"],
-            isAnonymous: json.decode(response.body)["data"][i]["isanonymous"],
+            isAnonymous: json.decode(response.body)["data"][i]["isanonymous"], time: '',
           ));
       //   caseList = json.decode(response.body)["data"];
       else

@@ -18,7 +18,7 @@ import 'package:naturesociety_new/Widgets/NoConnection.dart';
 
 class Watchlist extends StatefulWidget
 {
-  const Watchlist({Key key}) : super(key: key);
+  const Watchlist({required Key key}) : super(key: key);
   @override
   _WatchlistState createState() => _WatchlistState();
 }

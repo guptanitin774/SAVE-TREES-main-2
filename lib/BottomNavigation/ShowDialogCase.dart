@@ -26,7 +26,7 @@ class _ShowDialogCase extends State<ShowDialogCase>{
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text("checking Dialog"),
-            FlatButton(onPressed: () {getIncidentFullView();}, child: Text("Tap Here"))
+            TextButton(onPressed: () {getIncidentFullView();}, child: Text("Tap Here"))
           ],
         ),
       ),
@@ -235,17 +235,24 @@ class _ShowDialogCase extends State<ShowDialogCase>{
                                 SizedBox(height: 8.0,),
                                 Row(
                                   children: [
-                                   FlatButton(
-                                       minWidth: 20,
+                                   TextButton(
+                                       style: TextButton.styleFrom(
+                                         minimumSize: Size(20, 0),
+                                       ),
                                        onPressed: (){}, child: Icon(Icons.remove_red_eye)),
-                                   FlatButton(
-                                       minWidth: 20,
-                                       onPressed: (){}, child: Icon(Icons.share_sharp)),
+                                    TextButton(
+                                        style: TextButton.styleFrom(
+                                          minimumSize: Size(20, 0),
+                                        ),
+                                        onPressed: (){}, child: Icon(Icons.share_sharp)),
 
                                     Spacer(),
-                                    FlatButton(onPressed: (){},
-                                        textColor: Colors.white,
-                                        color: Colors.teal,
+                                    TextButton(
+                                        onPressed: (){},
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: Colors.white,
+                                          backgroundColor: Colors.teal,
+                                        ),
                                         child: Row(
                                       children: [
                                         Text("View Case in detail"),
