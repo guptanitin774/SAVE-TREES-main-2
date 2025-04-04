@@ -19,7 +19,6 @@ import 'package:naturesociety_new/Widgets/TutorialClass.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class BottomNavPage extends StatefulWidget
 {
   final navigationIndex;

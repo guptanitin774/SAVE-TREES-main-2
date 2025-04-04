@@ -2,10 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:geocoder/geocoder.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
-import 'package:circular_check_box/circular_check_box.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -27,6 +26,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart' as appHandler;
 import 'package:http/http.dart' as http;
+import 'package:location/location.dart' as loc;
 
 class AddACase extends StatefulWidget {
   _AddACase createState() => _AddACase();
@@ -50,10 +50,10 @@ class _AddACase extends State<AddACase> {
   }
 
 
-  Location location = new Location();
-  bool _serviceEnabled;
-  PermissionStatus _permissionGranted;
-  Position _locationData;
+  loc.Location location = new loc.Location();
+  late bool _serviceEnabled;
+  late PermissionStatus _permissionGranted;
+  late Position _locationData;
 
   locationPermission() async {
     await appHandler.Permission.camera.request();
@@ -87,11 +87,12 @@ class _AddACase extends State<AddACase> {
       await checkConnection();
       if(isConnected)
       {
-        final coordinates = new Coordinates(1.10, 45.50);
-        var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(_locationData.latitude,_locationData.longitude));
-        var first = addresses.first;
-        print("${first.featureName} : ${first.addressLine}");
-        countryCaseId = first.countryName;
+        final coordinates = LatLng(_locationData.latitude, _locationData.longitude);
+        var placemarks = await placemarkFromCoordinates(_locationData.latitude, _locationData.longitude);
+        var first = placemarks.first;
+        print("${first.name} : ${first.street}");
+        countryCaseId = first.country;
+        print("${first.street} : ${first.country}");
       }
       else{}
       Future.delayed(const Duration(microseconds: 50), () async {
@@ -159,13 +160,13 @@ var countryCaseId;
     }
   }
 
-  Map profileDetails;
+  late Map profileDetails;
   var userName = "";
 
   Future<void> setDefaultUser() async {
-    userName = await LocalPrefManager.getUserName();
-    bool anonymous = await LocalPrefManager.getAnonymity();
-    if (anonymous || anonymous == null)
+    userName = (await LocalPrefManager.getUserName())!;
+    bool? anonymous = await LocalPrefManager.getAnonymity();
+    if (anonymous! || anonymous == null)
       selectedUserType = "Anonymous";
     else{
       if(userName == "" || userName == null)
@@ -177,7 +178,7 @@ var countryCaseId;
   }
 
   var lat, lon;
-  List placeMark;
+  late List placeMark;
   var country, stateSelected, city;
 
   final Set<Marker> markers = Set();
@@ -189,11 +190,10 @@ var countryCaseId;
     });
     if (isConnected) {
       try {
-        final coordinates = new Coordinates(1.10, 45.50);
-        var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(_locationData.latitude, _locationData.longitude));
-        var first = addresses.first;
-        print("${first.featureName} : ${first.addressLine}");
-        placeDetail="${first.addressLine}";
+        var placemarks = await placemarkFromCoordinates(_locationData.latitude, _locationData.longitude);
+        var first = placemarks.first;
+        print("${first.name} : ${first.street}");
+        placeDetail = "${first.street}, ${first.locality}";
 
         markers.add(Marker(
             position: LatLng(_locationData.latitude, _locationData.longitude),
@@ -201,12 +201,12 @@ var countryCaseId;
             // icon: BitmapDescriptor.fromBytes(markerIcon),
 
         ));
-       country = first.countryName;
-        stateSelected = first.adminArea;
+        country = first.country;
+        stateSelected = first.administrativeArea;
         city = first.locality;
 
-        http.get("https://maps.googleapis.com/maps/api/geocode/json?" + "latlng=${_locationData.latitude},${_locationData.longitude}&" +
-            "key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw")
+        http.get(("https://maps.googleapis.com/maps/api/geocode/json?" + "latlng=${_locationData.latitude},${_locationData.longitude}&" +
+            "key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw") as Uri)
             .then((response) {
           if (response.statusCode == 200) {
             var responseJson = jsonDecode(response.body)["results"];
@@ -370,7 +370,7 @@ var countryCaseId;
 
   List postReason = [];
   List<File> photos = [];
-  List<File> fileList = new List();
+  List fileList = [];
 
   Widget casePhotos(BuildContext context) {
     return  StoreConnector<AppState, AppState>(
@@ -404,7 +404,7 @@ var countryCaseId;
                           ),
                           child: InkWell(
                             onTap: () async {
-                              List<File> returnFileList = new List();
+                              List<dynamic> returnFileList = [];
                               try {
                                 returnFileList = await Navigator.push(context,
                                     MaterialPageRoute(builder: (context) => TakePictureScreen()));
@@ -415,7 +415,7 @@ var countryCaseId;
                                   }
                                 setState(() {});
                               } catch (e) {
-                                Fluttertoast.showToast(msg: e);
+                                Fluttertoast.showToast(msg: e.toString());
                               }
                             },
                             child: ClipRRect(
@@ -640,7 +640,9 @@ var countryCaseId;
               userName == "" || userName == null ? SizedBox.shrink() :Radio(
                 value: userName,
                 groupValue: selectedUserType,
-                onChanged: radioButtonChanges,
+                onChanged: (String? value) {
+                  if (value != null) radioButtonChanges(value);
+                },
               ),
               userName == "" || userName == null ? SizedBox.shrink() :GestureDetector(
                 onTap: ()=>radioButtonChanges(userName),
@@ -652,7 +654,9 @@ var countryCaseId;
               Radio(
                 value: 'Anonymous',
                 groupValue: selectedUserType,
-                onChanged: radioButtonChanges,
+                onChanged: (String? value) {
+                  if (value != null) radioButtonChanges(value);
+                },
               ),
               GestureDetector(
                 onTap: ()=>radioButtonChanges("Anonymous"),
@@ -666,7 +670,7 @@ var countryCaseId;
     );
   }
 
-  String choice;
+  late String choice;
   void radioButtonChanges(String value) async{
     SharedPreferences preference = await SharedPreferences.getInstance();
     setState(() {
@@ -681,7 +685,7 @@ var countryCaseId;
           preference.setBool("anonymous",false);
           break;
         default:
-          choice = null;
+          choice = '';
           preference.setBool("anonymous",true);
       }
       debugPrint(choice); //Debug the choice in console
@@ -694,16 +698,16 @@ var countryCaseId;
     for (int i = 0; i < reasonsList.length; i++)
       listItems.add(Row(
         children: <Widget>[
-          CircularCheckBox(
+          Checkbox(
             value: reasonsList[i].selected,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            onChanged: (bool val) {
+            onChanged: (bool? val) {
               setState(() {
                 if (reasonsList[i].selected)
                   reasonsList[i].setter(false);
                 else
                   reasonsList[i].setter(true);
-                val ? selectedReason.add(reasonsList[i]) : selectedReason.remove(reasonsList[i]);
+                val == true ? selectedReason.add(reasonsList[i]) : selectedReason.remove(reasonsList[i]);
               });
             },
           ),
@@ -730,7 +734,7 @@ var countryCaseId;
 
 
 
-   String selectedUserType;
+   late String selectedUserType;
 
 
   List treeCutOptions = [
@@ -869,7 +873,7 @@ var countryCaseId;
 
                                   controller: cutCount[i],
                                   maxLength: 4,
-                                  maxLengthEnforced: true,
+                                  maxLengthEnforcement: MaxLengthEnforcement.none,
                                   decoration: InputDecoration(
                                       //contentPadding: EdgeInsets.all(5),
                                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white),),
@@ -1026,7 +1030,7 @@ var returnResponse;
     var to = await LocalPrefManager.getToken();
     print(to);
     Map<String,String> data = {'id':id,};
-    request.headers.addAll({'Content-Type': 'application/form-data', 'x-auth-token': to});
+    request.headers.addAll({'Content-Type': 'application/form-data', 'x-auth-token': to ?? ''});
     request.fields.addAll(data);
     if (photoArray != null) {
      await photoArray.forEach((File file)async {

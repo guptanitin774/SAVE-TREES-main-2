@@ -122,7 +122,7 @@ bool containsRecentSearch = false;
       onWillPop: onWillPop,
       child: new Scaffold(
         appBar: buildBar(context),
-        body: !connectionStatus? NoConnection(notifyParent:  recentSearchSuggestions,): !loadingSearch?  SafeArea(
+        body: !connectionStatus? NoConnection(notifyParent:  recentSearchSuggestions, key: UniqueKey()): !loadingSearch?  SafeArea(
             child: _searchQuery.text.length == 0 ? Container(
               child: ListView.builder(
                 padding: EdgeInsets.symmetric(vertical: 10.0,horizontal: 16.0),
@@ -417,40 +417,37 @@ bool containsRecentSearch = false;
     return items;
   }
 
-  Widget buildBar(BuildContext context) {
-    return new AppBar(
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        elevation: 1.0,
-        backgroundColor: Colors.white,
-        title: Row(
-          children: [
-            IconButton(icon: Icon(Icons.arrow_back), onPressed: (){
-                Navigator.pop(context);
-            },),
-            Icon(Icons.search, color: Colors.black),
-            SizedBox(width: 10,),
-            Expanded(
-              child: TextField(
-                focusNode: searchKeyboard,
-                controller: _searchQuery,
-                style: new TextStyle(color: Colors.black),
-                onChanged: callSearch,
-                decoration: new InputDecoration(
-                    border: InputBorder.none,
-//              prefixIcon: new Icon(Icons.search, color: Colors.black),
-                    hintText: "Type Location / CaseId",
-                    hintStyle: new TextStyle(color: Colors.grey)
-                ),
-                onSubmitted: onSearchSubmitted,
-              ),
-            ),
-          ],
-        ),
-
-    );
-  }
-
+   PreferredSizeWidget buildBar(BuildContext context) {
+     return AppBar(
+       centerTitle: true,
+       automaticallyImplyLeading: false,
+       elevation: 1.0,
+       backgroundColor: Colors.white,
+       title: Row(
+         children: [
+           IconButton(icon: Icon(Icons.arrow_back), onPressed: (){
+             Navigator.pop(context);
+           },),
+           Icon(Icons.search, color: Colors.black),
+           SizedBox(width: 10,),
+           Expanded(
+             child: TextField(
+               focusNode: searchKeyboard,
+               controller: _searchQuery,
+               style: new TextStyle(color: Colors.black),
+               onChanged: callSearch,
+               decoration: new InputDecoration(
+                   border: InputBorder.none,
+                   hintText: "Type Location / CaseId",
+                   hintStyle: new TextStyle(color: Colors.grey)
+               ),
+               onSubmitted: onSearchSubmitted,
+             ),
+           ),
+         ],
+       ),
+     );
+   }
 
   Future<void> onSearchSubmitted(var text) async{
     setState(() {
@@ -471,6 +468,6 @@ class SearchModel{
   String type;
   var dataSet;
   bool showSuggestion;
-  SearchModel({@required this.type, this.dataSet, this.showSuggestion, this.icon});
+  SearchModel({required this.type, this.dataSet, required this.showSuggestion, required this.icon});
 }
 

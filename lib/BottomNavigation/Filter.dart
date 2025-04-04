@@ -6,6 +6,7 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:naturesociety_new/Utils/MaterialComponets.dart';
 import 'package:naturesociety_new/Widgets/CommonFunction.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart' as picker;
 
 class Filter extends StatefulWidget {
   final isFilterOn;
@@ -670,7 +671,7 @@ class _Filter extends State<Filter> {
 
   Future<Null> _caseReportedFromPicker(BuildContext context) async {
     DatePicker.showDatePicker(context,
-        theme: DatePickerTheme(
+        theme: picker.DatePickerTheme(
             containerHeight: 210.0,
             itemStyle: TextStyle(color: Colors.teal),
             doneStyle: TextStyle(color: MaterialTools.basicColor, fontWeight: FontWeight.w800)),
@@ -686,7 +687,7 @@ class _Filter extends State<Filter> {
 
   Future<Null> _caseReportedToPicker(BuildContext context) async {
     DatePicker.showDatePicker(context,
-        theme: DatePickerTheme(
+        theme: picker.DatePickerTheme(
             containerHeight: 210.0,
             itemStyle: const TextStyle(color: Colors.teal),
             doneStyle: TextStyle(color: MaterialTools.basicColor, fontWeight: FontWeight.w800)),
@@ -703,7 +704,7 @@ class _Filter extends State<Filter> {
 
   Future<Null> _caseUpdatedFromPicker(BuildContext context) async {
     DatePicker.showDatePicker(context,
-        theme: DatePickerTheme(
+        theme: picker.DatePickerTheme(
             itemStyle: TextStyle(color: Colors.teal),
             doneStyle: TextStyle(
                 color: MaterialTools.basicColor, fontWeight: FontWeight.w800)),
@@ -719,7 +720,7 @@ class _Filter extends State<Filter> {
 
   Future<Null> _caseUpdatedToPicker(BuildContext context) async {
     DatePicker.showDatePicker(context,
-        theme: DatePickerTheme(
+        theme: picker.DatePickerTheme(
             itemStyle: TextStyle(color: Colors.teal),
             doneStyle: TextStyle(
                 color: MaterialTools.basicColor, fontWeight: FontWeight.w800)),
