@@ -15,9 +15,10 @@ import 'package:naturesociety_new/Widgets/CommonFunction.dart';
 import 'package:naturesociety_new/Widgets/CommonWidgets.dart';
 import 'package:naturesociety_new/Widgets/NoConnection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart' as flutter_datetime_picker;
 
 class ViewProfile extends StatefulWidget {
-  const ViewProfile({Key key}) : super(key: key);
+  const ViewProfile({required Key key}) : super(key: key);
 
   @override
   _ViewProfileState createState() => _ViewProfileState();
@@ -42,8 +43,8 @@ class _ViewProfileState extends State<ViewProfile> {
   final formKey = GlobalKey<FormState>();
 
   void _validate() {
-    if (formKey.currentState.validate()) {
-      formKey.currentState.save();
+    if (formKey.currentState!.validate()) {
+      formKey.currentState?.save();
       completeProfile();
     } else {
       setState(() {
@@ -52,7 +53,7 @@ class _ViewProfileState extends State<ViewProfile> {
     }
   }
 
-  String name, occupation, age;
+  late String name, occupation, age;
 
   void completeProfile() async {
     Map data = {
@@ -116,10 +117,10 @@ class _ViewProfileState extends State<ViewProfile> {
 
   List<dynamic> gender = ["Male", "Female", "Others"];
 
-  String selectedChoice , selected1;
+  late String selectedChoice , selected1;
   bool selected = false;
 
-  File _image;
+  late File _image;
   void _settingModalBottomSheet(context) {
     showModalBottomSheet(
         context: context,
@@ -131,8 +132,8 @@ class _ViewProfileState extends State<ViewProfile> {
                     leading: new Icon(Icons.camera_alt,color: Colors.teal,),
                     title: new Text('Camera'),
                     onTap: () async => {
-                      _image = null,
-                      _image = await ApiCall.getImageFile(ImageSource.camera),
+                      _image = File(''),
+                      _image = (await ApiCall.getImageFile(ImageSource.camera))!,
                       Navigator.pop(context),
                       setState(() {
                         _image = _image;
@@ -146,8 +147,8 @@ class _ViewProfileState extends State<ViewProfile> {
                   leading: new Icon(Icons.image, color: Colors.teal,),
                   title: new Text('Gallery'),
                   onTap: () async => {
-                    _image = null,
-                    _image = await ApiCall.getImageFile(ImageSource.gallery),
+                    _image = File(''),
+                    _image = (await ApiCall.getImageFile(ImageSource.gallery))!,
                     Navigator.pop(context),
                     setState(() {
                       _image = _image;
@@ -296,14 +297,14 @@ class _ViewProfileState extends State<ViewProfile> {
                           color: Color(0xff3c908d),
                         )),
                     validator: (val) {
-                      if (val.isEmpty)
+                      if (val!.isEmpty)
                         return "Cannot be empty!";
                       else if(RegExp(r'(^[a-zA-Z ]*$)')
                           .hasMatch(val)) {
                         return null; }
                       else {return "Only Alphabets are Allowed";}
                     },
-                    onSaved: (val) {name = val;},
+                    onSaved: (val) {name = val!;},
                     textCapitalization: TextCapitalization.words,
                     keyboardType: TextInputType.text
                   ),
@@ -335,7 +336,7 @@ class _ViewProfileState extends State<ViewProfile> {
                           // dob = value.toIso8601String();
                         },
                         validator: (value) {
-                          if (value.isEmpty)
+                          if (value!.isEmpty)
                             return null;
                           else
                             return null;
@@ -389,7 +390,7 @@ class _ViewProfileState extends State<ViewProfile> {
                         )),
 
                     onSaved: (val) {
-                      occupation = val;
+                      occupation = val!;
                     },
                     textCapitalization: TextCapitalization.words,
                   ),
@@ -438,7 +439,7 @@ class _ViewProfileState extends State<ViewProfile> {
         ),
 
 
-        body:  isConnected ? startLoading ? CommonWidgets.progressIndicator(context) : mainScreen(context): NoConnection( notifyParent:  viewProfile,),),
+        body:  isConnected ? startLoading ? CommonWidgets.progressIndicator(context) : mainScreen(context): NoConnection( notifyParent:  viewProfile, key: UniqueKey(),),),
     );
   }
 
@@ -487,8 +488,8 @@ class _ViewProfileState extends State<ViewProfile> {
     DateTime threenYearsAgo = DateTime.now().subtract(new Duration(days: 4745));
 
     DatePicker.showDatePicker(context,
-        theme: DatePickerTheme(
-          itemStyle: TextStyle(color: Colors.teal),
+        theme: flutter_datetime_picker.DatePickerTheme(
+            itemStyle: const TextStyle(color: Colors.teal),
             doneStyle: TextStyle(color: MaterialTools.basicColor, fontWeight: FontWeight.w800)),
         showTitleActions: true,
         minTime: DateTime(1917, 1),

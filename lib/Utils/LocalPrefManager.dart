@@ -5,7 +5,7 @@ class LocalPrefManager{
 
   // -----  Token --------
 
-  static Future<String> getToken() async {
+  static Future<String?> getToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
@@ -21,7 +21,7 @@ class LocalPrefManager{
     prefs.setString('firebase_token', fbToken);
   }
 
-  static Future<String> getFirebaseToken() async {
+  static Future<String?> getFirebaseToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('firebase_token');
   }
@@ -33,7 +33,7 @@ class LocalPrefManager{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('user-id', userId);
   }
-  static Future<String> getUserId() async {
+  static Future<String?> getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('user-id');
   }
@@ -45,7 +45,7 @@ class LocalPrefManager{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('User_Name', userName);
   }
-  static Future<String> getUserName() async {
+  static Future<String?> getUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('User_Name');
   }
@@ -58,14 +58,14 @@ class LocalPrefManager{
     prefs.setBool('anonymous', anonymous);
   }
 
-  static Future<bool> getAnonymity() async {
+  static Future<bool?> getAnonymity() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool('anonymous');
   }
 
   // ----- FeedBack Time --------
 
-  static Future<int> getLocalFeedbackTime() async {
+  static Future<int?> getLocalFeedbackTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getInt('local_feedback_time');
   }
@@ -83,7 +83,7 @@ class LocalPrefManager{
 
   // ----- Firebase Fcm Token --------
 
-  static Future<String> getFcmToken() async {
+  static Future<String?> getFcmToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('firebase_fcm');
   }
@@ -97,7 +97,7 @@ class LocalPrefManager{
 
   // ----- Live Notification --------
 
-  static Future<bool> getLiveNotification() async {
+  static Future<bool?> getLiveNotification() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool('LiveNotification');
   }
@@ -108,7 +108,7 @@ class LocalPrefManager{
     SharedPreferences prefs = await SharedPreferences.getInstance();
      prefs.setBool('Initial_Launch', isInitial);
   }
-  static Future<bool> getInitialLaunch() async {
+  static Future<bool?> getInitialLaunch() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool('Initial_Launch');
   }
@@ -119,7 +119,7 @@ class LocalPrefManager{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('Main_Launch', isInMain);
   }
-  static Future<bool> getMainLaunch() async {
+  static Future<bool?> getMainLaunch() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool('Main_Launch');
   }

@@ -55,14 +55,14 @@ class _FeedbackForm extends State<FeedbackForm> {
   List<File> selectedImage=[];
   initMultiPickUp() async {
    try
-    { FilePickerResult result = await FilePicker.platform.pickFiles(allowMultiple: true, type: FileType.custom,
+    { FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true, type: FileType.custom,
       allowedExtensions: ['jpg', 'png', 'jpeg'],allowCompression: true);
     if(result != null) {
       if(selectedImage.length + result.files.length > 4) {
         Fluttertoast.showToast(msg: "Maximum selected Images are 4");
       }
       else {
-        List<File> files = result.paths.map((path) => File(path)).toList();
+        List<File> files = result.paths.map((path) => File(path!)).toList();
         files.forEach((element) {selectedImage.add(File(element.path));});
         setState(() {});
       }
@@ -317,7 +317,7 @@ class _FeedbackForm extends State<FeedbackForm> {
 
     var request = http.MultipartRequest('POST', Uri.parse(ApiCall.webUrl + "feedback/image"));
 
-    request.headers.addAll({'Content-Type': 'application/form-data', 'x-auth-token': to});
+    request.headers.addAll({'Content-Type': 'application/form-data', 'x-auth-token': to ?? ''});
     request.fields.addAll(data);
 
     if (selectedImage != null) {

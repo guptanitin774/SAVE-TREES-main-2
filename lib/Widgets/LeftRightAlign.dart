@@ -4,14 +4,14 @@ import 'dart:math' as math;
 
 class LeftRightAlign extends MultiChildRenderObjectWidget {
   LeftRightAlign({
-    Key key,
-    @required Widget left,
-    @required Widget right,
+    required Key key,
+    required Widget left,
+    required Widget right,
   }) : super(key: key, children: [left, right]);
 
   @override
   RenderLeftRightAlign createRenderObject(BuildContext context) {
-    return RenderLeftRightAlign();
+    return RenderLeftRightAlign(children: []);
   }
 }
 
@@ -21,9 +21,8 @@ class RenderLeftRightAlign extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, LeftRightAlignParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, LeftRightAlignParentData> {
-
   RenderLeftRightAlign({
-    List<RenderBox> children,
+    required List<RenderBox> children,
   }) {
     addAll(children);
   }
@@ -38,37 +37,42 @@ class RenderLeftRightAlign extends RenderBox
   void performLayout() {
     final BoxConstraints childConstraints = constraints.loosen();
 
-    final RenderBox leftChild = firstChild;
-    final RenderBox rightChild = lastChild;
+    final RenderBox? leftChild = firstChild;
+    final RenderBox? rightChild = lastChild;
 
-    leftChild.layout(childConstraints, parentUsesSize: true);
-    rightChild.layout(childConstraints, parentUsesSize: true);
+    leftChild?.layout(childConstraints, parentUsesSize: true);
+    rightChild?.layout(childConstraints, parentUsesSize: true);
 
-    final LeftRightAlignParentData leftParentData = leftChild.parentData;
-    final LeftRightAlignParentData rightParentData = rightChild.parentData;
+    if (leftChild != null && rightChild != null) {
+      final LeftRightAlignParentData leftParentData =
+          leftChild.parentData as LeftRightAlignParentData;
+      final LeftRightAlignParentData rightParentData =
+          rightChild.parentData as LeftRightAlignParentData;
 
-    final bool wrapped =
-        leftChild.size.width + rightChild.size.width > constraints.maxWidth;
+      final bool wrapped =
+          leftChild.size.width + rightChild.size.width > constraints.maxWidth;
 
-    leftParentData.offset = Offset.zero;
-    rightParentData.offset = Offset(
-        constraints.maxWidth - rightChild.size.width,
-        wrapped ? leftChild.size.height : 0);
+      leftParentData.offset = Offset.zero;
+      rightParentData.offset = Offset(
+          constraints.maxWidth - rightChild.size.width,
+          wrapped ? leftChild.size.height : 0);
 
-    size = Size(
-        constraints.maxWidth,
-        wrapped
-            ? leftChild.size.height + rightChild.size.height
-            : math.max(leftChild.size.height, rightChild.size.height));
-  }
+      size = Size(
+          constraints.maxWidth,
+          wrapped
+              ? leftChild.size.height + rightChild.size.height
+              : math.max(leftChild.size.height, rightChild.size.height));
+    }
 
-  @override
-  bool hitTestChildren(HitTestResult result, {Offset position}) {
-    return defaultHitTestChildren(result, position: position);
-  }
+    @override
+    bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+      return defaultHitTestChildren(result as BoxHitTestResult,
+          position: position);
+    }
 
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    defaultPaint(context, offset);
+    @override
+    void paint(PaintingContext context, Offset offset) {
+      defaultPaint(context, offset);
+    }
   }
 }

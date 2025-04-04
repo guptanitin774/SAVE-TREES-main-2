@@ -7,7 +7,7 @@ import 'package:naturesociety_new/Utils/MaterialComponets.dart';
 
 class TutorialClass {
 
-  static tutorialSession(BuildContext context, {@required bool initial}) async{
+  static tutorialSession(BuildContext context, {required bool initial}) async{
     var userName = await LocalPrefManager.getUserName();
     return showDialog<void>(
         context: context,

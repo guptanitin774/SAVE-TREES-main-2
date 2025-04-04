@@ -38,7 +38,7 @@ class SplashScreenState extends State<SplashScreen>   {
 
 
   Future<void>setFeedbackLocalTime() async{
-    int count = await LocalPrefManager.getLocalFeedbackTime();
+    int? count = await LocalPrefManager.getLocalFeedbackTime();
     if(count == 0 || count == null)
       count = 1;
     else

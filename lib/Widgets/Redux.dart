@@ -3,21 +3,20 @@
 import 'package:flutter/material.dart';
 
 class AppState {
-  int notificationCount;
-  bool isInWatchList;
-  int cameraPhotosCount;
+  int notificationCount = 0;
+  bool isInWatchList = false;
+  int cameraPhotosCount = 0;
 
   AppState(
-      {@required this.notificationCount, this.isInWatchList = false, this.cameraPhotosCount});
+      {required this.notificationCount, this.isInWatchList = false, required this.cameraPhotosCount});
 
   AppState.fromAppState(AppState another) {
     notificationCount = another.notificationCount;
     isInWatchList = another.isInWatchList;
     cameraPhotosCount = another.cameraPhotosCount;
-
   }
 
-  int get viewFontSize => notificationCount  ;
+  int get viewFontSize => notificationCount;
 }
 
 

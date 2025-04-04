@@ -105,7 +105,7 @@ bool loading = true;
       if(returnValue.isNotEmpty)
       {
         final compression =  await ApiCall.compressAndGetFile(File(returnValue));
-        fileList.add(compression);
+        fileList.add(compression as File);
         setState(() {});
 
       }

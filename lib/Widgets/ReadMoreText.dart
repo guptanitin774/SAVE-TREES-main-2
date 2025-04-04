@@ -10,19 +10,19 @@ enum TrimMode {
 class ReadMoreText extends StatefulWidget {
   const ReadMoreText(
       this.data, {
-        Key key,
+        required Key key,
         this.trimExpandedText = ' read less',
         this.trimCollapsedText = ' ...read more',
-        this.colorClickableText,
+        required this.colorClickableText,
         this.trimLength = 240,
         this.trimLines = 2,
         this.trimMode = TrimMode.Length,
-        this.style,
-        this.textAlign,
-        this.textDirection,
-        this.locale,
-        this.textScaleFactor,
-        this.semanticsLabel,
+        required this.style,
+        required this.textAlign,
+        required this.textDirection,
+        required this.locale,
+        required this.textScaleFactor,
+        required this.semanticsLabel,
       })  : assert(data != null),
         super(key: key);
 
@@ -70,10 +70,10 @@ class ReadMoreTextState extends State<ReadMoreText> {
         widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context);
     final overflow = defaultTextStyle.overflow;
     final locale =
-        widget.locale ?? Localizations.localeOf(context, nullOk: true);
+        widget.locale ?? Localizations.maybeLocaleOf(context);
 
     final colorClickableText =
-        widget.colorClickableText ?? Theme.of(context).accentColor;
+        widget.colorClickableText ?? Theme.of(context).colorScheme.secondary;
 
     TextSpan link = TextSpan(
       text: _readMore ? widget.trimCollapsedText : widget.trimExpandedText,
@@ -115,7 +115,7 @@ class ReadMoreTextState extends State<ReadMoreText> {
 
         // Get the endIndex of data
         bool linkLongerThanLine = false;
-        int endIndex;
+        int? endIndex;
 
         if (linkSize.width < maxWidth) {
           final pos = textPainter.getPositionForOffset(Offset(

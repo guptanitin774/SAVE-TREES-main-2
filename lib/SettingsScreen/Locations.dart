@@ -83,7 +83,7 @@ class _Locations extends State<Locations>{
         ),
 
         body:!isConnected ? NoConnection(
-          notifyParent: getLocations,
+          notifyParent: getLocations, key: UniqueKey(),
         ) : isLoading  ? CommonWidgets.progressIndicator(context) : screen(context),
 
 
@@ -304,13 +304,13 @@ class _Locations extends State<Locations>{
         new AlertDialog(
           content: new Text("Do you want to remove this location ?"),
           actions: [
-            FlatButton(
+            TextButton(
               child: new Text("CANCEL"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
+            TextButton(
               child: new Text("OK"),
               onPressed: () {
                 removeUserLocation(id);

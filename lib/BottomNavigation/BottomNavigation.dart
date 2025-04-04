@@ -95,12 +95,12 @@ class _BottomNavPage extends State<BottomNavPage>
   }
 
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
-  Future<void> checkInitialLaunch() async{
-    bool needOpen = await LocalPrefManager.getInitialLaunch();
-    if(needOpen)
-     { TutorialClass.tutorialSession(context, initial: true);
-        await LocalPrefManager.setInitialLaunch(true);}
-    else{}
+  Future<void> checkInitialLaunch() async {
+    bool? needOpen = await LocalPrefManager.getInitialLaunch();
+    if (needOpen == true) {
+      TutorialClass.tutorialSession(context, initial: true);
+      await LocalPrefManager.setInitialLaunch(true);
+    }
   }
 
   //BottomNav Notification Count
@@ -127,7 +127,7 @@ class _BottomNavPage extends State<BottomNavPage>
       else
         {
           var userData = await LocalPrefManager.getUserName();
-          preference.setString("User_Name",userData);
+          preference.setString("User_Name",userData!);
           setState(() {
             isConnected = false;
           });
@@ -136,7 +136,7 @@ class _BottomNavPage extends State<BottomNavPage>
 
 
   Future<void>getLocalFeedbackTime() async{
-    int count = await LocalPrefManager.getLocalFeedbackTime();
+    int? count = await LocalPrefManager.getLocalFeedbackTime();
     var userName = await LocalPrefManager.getUserName();
     if(count == 25 && isConnected)
       Future.delayed(const Duration(seconds: 4), () async{
@@ -195,7 +195,7 @@ class _BottomNavPage extends State<BottomNavPage>
               ],
             ), text: 'Notification'),
             FABBottomAppBarItem(iconData: Icon(Icons.menu_rounded , color: _selectedIndex == 3? Colors.teal : Colors.black54,), text: 'More'),
-          ],
+          ], centerItemText: '', backgroundColor: Colors.black,
         );}
       ),
 

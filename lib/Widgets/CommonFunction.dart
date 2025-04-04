@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,10 +15,9 @@ class CommonFunction {
   static Future<bool> uploadPhoto(File _image) async {
 
     var request = http.MultipartRequest('POST', Uri.parse(ApiCall.webUrl + 'user/photo'));
-    String to = await LocalPrefManager.getToken();
+    String? to = await LocalPrefManager.getToken();
 
-    request.headers.addAll({'Content-Type': 'application/form-data', 'x-auth-token': to});
-    // request.fields.addAll(data);
+request.headers.addAll({'Content-Type': 'application/form-data', 'x-auth-token': to ?? ''});    // request.fields.addAll(data);
 
     if (_image != null) {
       request.files.add(http.MultipartFile.fromBytes(
@@ -134,7 +132,7 @@ class CommonFunction {
   }
 
 
-  static createDynamicLink({@required var caseId,@required  var title,@required  var description ,@required  var image}) async {
+  static createDynamicLink({required var caseId,required  var title,required  var description ,required  var image}) async {
     String _linkMessage;
     final DynamicLinkParameters parameters = DynamicLinkParameters(
       uriPrefix: 'https://ndns.page.link',
@@ -144,10 +142,7 @@ class CommonFunction {
         packageName: 'ndns.save_trees',
         minimumVersion: 0,
       ),
-      dynamicLinkParametersOptions: DynamicLinkParametersOptions(
-        shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short,
-      ),
-      iosParameters: IosParameters(
+      iosParameters: const IOSParameters(
         bundleId: 'com.google.FirebaseCppDynamicLinksTestApp.dev',
         minimumVersion: '0',
       ),
@@ -160,7 +155,7 @@ class CommonFunction {
     );
 
     Uri url;
-    final ShortDynamicLink shortLink = await parameters.buildShortLink();
+    final shortLink = await FirebaseDynamicLinks.instance.buildShortLink(parameters);
     url = shortLink.shortUrl;
 
     _linkMessage = url.toString();

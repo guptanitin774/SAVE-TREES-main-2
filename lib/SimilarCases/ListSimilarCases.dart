@@ -62,13 +62,13 @@ class _SimilarCases extends State<SimilarCases>{
         builder: (context) => AlertDialog(
           content: new Text(msg?? "Server Error"),
           actions: [
-            FlatButton(
+            TextButton(
               child: new Text("CANCEL"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
+            TextButton(
               child: new Text("OK"),
               onPressed: () {
                 removeDraft();
@@ -212,22 +212,17 @@ class _SimilarCases extends State<SimilarCases>{
 
                                   child: ClipRRect(
                                       borderRadius: BorderRadius.all(Radius.circular(1.0)),
-                                      child: Image(image: CachedNetworkImageProvider(ApiCall.imageUrl+similarCseDetails[index - 1]["photos"][photoIndex]["photo"])
-                                        ,fit:  BoxFit.cover,
-                                        loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
-                                          if (loadingProgress == null) return child;
-                                          return Center(
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              backgroundColor: Colors.white54,
-                                              valueColor: new AlwaysStoppedAnimation<Color>(Colors.green),
-                                              value: loadingProgress.expectedTotalBytes != null ?
-                                              loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                                                  : null,
-                                            ),
-                                          );
-                                        },)
-
+                                      child: CachedNetworkImage(
+                                        imageUrl: ApiCall.imageUrl+similarCseDetails[index - 1]["photos"][photoIndex]["photo"],
+                                        fit: BoxFit.cover,
+                                        progressIndicatorBuilder: (context, url, progress) => Center(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            backgroundColor: Colors.white54,
+                                            valueColor: new AlwaysStoppedAnimation<Color>(Colors.green),
+                                            value: progress.progress,
+                                          ),
+                                        ))
 
                                   )),
                             );

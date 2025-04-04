@@ -57,7 +57,7 @@ class _AllNotifications extends State<AllNotifications>{
   }
 
 
-  bool notification,newPostsAndUpdates,discussion,allComments,mentioningMe,nearByCases,systemNotification ;
+  late bool notification,newPostsAndUpdates,discussion,allComments,mentioningMe,nearByCases,systemNotification ;
   
   Future<void> sendNotificationSettings() async{
     setState(() {
@@ -100,7 +100,7 @@ class _AllNotifications extends State<AllNotifications>{
             automaticallyImplyLeading: false,
           ),
         ),
-        body: isLoading ? Center(child: CommonWidgets.progressIndicator(context),) : isConnected? mainScreen(context): NoConnection(notifyParent: getNotificationList,) ,
+        body: isLoading ? Center(child: CommonWidgets.progressIndicator(context),) : isConnected? mainScreen(context): NoConnection(notifyParent: getNotificationList, key: UniqueKey(),) ,
 
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: isLoading || !isConnected ? SizedBox.shrink(): MaterialButton(
@@ -229,7 +229,7 @@ class _AllNotifications extends State<AllNotifications>{
                               child: Radio(
                                 value: 'all_comments',
                                 groupValue: _radioValue,
-                                onChanged: radioButtonChanges,
+                                onChanged: (value) => value != null ? radioButtonChanges(value) : null,
                               ),
                             ),
                             Expanded(
@@ -254,7 +254,7 @@ class _AllNotifications extends State<AllNotifications>{
                               child: Radio(
                                 value: 'mentioning_me',
                                 groupValue: _radioValue,
-                                onChanged: radioButtonChanges,
+                                onChanged: (value) => value != null ? radioButtonChanges(value) : null,
                               ),
                             ),
                             Expanded(
@@ -309,8 +309,9 @@ class _AllNotifications extends State<AllNotifications>{
   }
 
 
-  String _radioValue ="all_comments"; //Initial definition of radio button value
-  String choice = "all_comments";
+  String _radioValue = "all_comments"; //Initial definition of radio button value
+  String? choice = "all_comments";  // Make choice nullable by adding ?
+
   void radioButtonChanges(String value) async{
     setState(() {
       _radioValue = value;

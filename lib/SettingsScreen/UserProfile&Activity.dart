@@ -56,7 +56,7 @@ class _UserProfileActivity extends State <UserProfileActivity>{
           elevation: 0.0,
         ),
 
-        body: !isConnected ? NoConnection(notifyParent: getProfileDetails,) : !isLoading ? SingleChildScrollView(
+        body: !isConnected ? NoConnection(notifyParent: getProfileDetails, key: UniqueKey()) : !isLoading ? SingleChildScrollView(
           child: AnimationLimiter(
             child: Column(
               children: AnimationConfiguration.toStaggeredList(
@@ -79,7 +79,7 @@ class _UserProfileActivity extends State <UserProfileActivity>{
                         Spacer(),
                         GestureDetector(
                           onTap: () async{
-                            bool refresh = await Navigator.push(context, MaterialPageRoute(builder: (context)=> ViewProfile()));
+                            bool refresh = await Navigator.push(context, MaterialPageRoute(builder: (context)=> ViewProfile(key: UniqueKey())));
                             if(refresh)
                               getProfileDetails();
                           },
@@ -319,7 +319,7 @@ class _UserProfileActivity extends State <UserProfileActivity>{
   }
 
 var profileDetails; bool isLoading = true, isConnected = true;
-int incidentCount, updateCount, commentsCount;
+late int incidentCount, updateCount, commentsCount;
   Future<void> getProfileDetails() async{
     CustomResponse response = await ApiCall.makeGetRequestToken("user/profile");
     if(response.status == 200)

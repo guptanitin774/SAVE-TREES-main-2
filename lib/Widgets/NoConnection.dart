@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class NoConnection extends StatefulWidget{
   final Future<void> Function() notifyParent;
-  NoConnection({Key key, @required this.notifyParent}) : super(key: key);
+  NoConnection({required Key key, required this.notifyParent}) : super(key: key);
   @override
   _NoConnection createState() => _NoConnection();
 

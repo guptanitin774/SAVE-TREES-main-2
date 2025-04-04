@@ -17,8 +17,8 @@ class Anonymity extends StatefulWidget{
 
 class _Anonymity extends State <Anonymity>{
 
-  String _radioValue; //Initial definition of radio button value
-  String choice;
+  late String _radioValue; //Initial definition of radio button value
+  late String choice;
 @override
 void initState()
 {
@@ -45,9 +45,9 @@ Future<void>getUserList() async{
   }
    else
      {
-       bool isAnonymous = await LocalPrefManager.getAnonymity();
+       bool? isAnonymous = await LocalPrefManager.getAnonymity();
        setState(() {
-         isAnonymous ? _radioValue = "anonymous" : _radioValue =  "name";
+         _radioValue = isAnonymous ?? false ? "anonymous" : "name";
        });
      }
 
@@ -68,7 +68,7 @@ Future<void>getUserList() async{
           preference.setBool("anonymous",false);
           break;
         default:
-          choice = null;
+          choice = 'anonymous';
           preference.setBool("anonymous",true);
       }
      // debugPrint(choice); //Debug the choice in console
@@ -127,7 +127,7 @@ Future<void>getUserList() async{
               Radio(
                 value: 'anonymous',
                 groupValue: _radioValue,
-                onChanged: radioButtonChanges,
+                onChanged: (value) => value != null ? radioButtonChanges(value) : null,
               ),
               Expanded(
                 flex: 2,
@@ -147,7 +147,7 @@ Future<void>getUserList() async{
               Radio(
                 value: 'name',
                 groupValue: _radioValue,
-                onChanged: radioButtonChanges,
+                onChanged: (value) => value != null ? radioButtonChanges(value) : null,
               ),
               Expanded(
                 flex: 2,
@@ -211,7 +211,7 @@ Future<void>getUserList() async{
                 style: TextStyle(color: Colors.black,  fontWeight: FontWeight.w800, fontSize: 16),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () async{
-                  bool needRefresh = await Navigator.push(context, MaterialPageRoute(builder: (context)=> ViewProfile()));
+                  bool needRefresh = await Navigator.push(context, MaterialPageRoute(builder: (context)=> ViewProfile(key: UniqueKey())));
                   if(needRefresh)
                    { getUserDetails();
                   getUserList();}

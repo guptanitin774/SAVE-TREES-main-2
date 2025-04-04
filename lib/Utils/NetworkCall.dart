@@ -37,15 +37,15 @@ class ApiCall
 
   static Future<http.Response> makeGetRequest(url) async
   {
-    http.Response response = await http.get(webUrl+url);
+    http.Response response = await http.get((webUrl+url) as Uri);
     return response;
   }
 
   static Future<CustomResponse> makeGetRequestToken(url,{paramsData}) async
   {
-    String token = await LocalPrefManager.getToken();
+    String? token = await LocalPrefManager.getToken();
     Map<String,String> data = {
-      'x-auth-token':token
+      'x-auth-token':token ?? ''
     };
 
     if(paramsData?.isNotEmpty ?? false){
@@ -55,7 +55,7 @@ class ApiCall
     CustomResponse customResponse;
     try{
       var response = await http.get(
-        webUrl+url,
+        (webUrl+url) as Uri,
         headers: data,
       ).timeout(Duration(seconds: 15
       ));
@@ -77,9 +77,9 @@ class ApiCall
 
   static Future<CustomResponse> makeSocketGetRequestToken(url,{paramsData}) async
   {
-    String token = await LocalPrefManager.getToken();
+    String? token = await LocalPrefManager.getToken();
     Map<String,String> data = {
-      'x-auth-token':token
+      'x-auth-token':token ?? ''
     };
 
     if(paramsData?.isNotEmpty ?? false){
@@ -89,7 +89,7 @@ class ApiCall
     CustomResponse customResponse;
     try{
       var response = await http.get(
-        webUrl+url,
+        (webUrl+url) as Uri,
         headers: data,
       ).timeout(Duration(seconds: 120));
 
@@ -105,10 +105,10 @@ class ApiCall
     return customResponse;
   }
 
-  static Future<CustomResponse> makePostRequestToken(url,{Map paramsData}) async
+  static Future<CustomResponse> makePostRequestToken(url,{required Map paramsData}) async
   {
 
-    String token = await LocalPrefManager.getToken();
+    String? token = await LocalPrefManager.getToken();
     Map data = {
       'x-auth-token':token
     };
@@ -121,8 +121,8 @@ class ApiCall
 
     try{
       var response = await http.post(
-        webUrl+url,
-        headers: {"Content-Type": "application/json", "x-auth-token": token,},
+        (webUrl+url) as Uri,
+        headers: {"Content-Type": "application/json", "x-auth-token": token ?? ''},
         body: body,
       ).timeout(Duration(seconds: 30));
 
@@ -141,18 +141,18 @@ class ApiCall
   }
 
 
-  static Future<File> getImageFile(ImageSource source) async {
+  static Future<File?> getImageFile(ImageSource source) async {
 //    Future<File> _futureImage;
    File _imageFile;
 //    var date = DateTime.now();
 
     ImagePicker imagePicker = ImagePicker();
-    PickedFile compressedImage = await imagePicker.getImage(
+    XFile? compressedImage = await imagePicker.pickImage(
       source: source,
       imageQuality: 50,
     );
     // print(compressedImage.path);
-    _imageFile = File(compressedImage.path);
+    _imageFile = File(compressedImage!.path);
 
      return _imageFile != null ? _imageFile : null;
 
@@ -163,7 +163,7 @@ class ApiCall
     await prefs.clear();
   }
 
-  static Future<File> compressAndGetFile(File file) async {
+  static Future<XFile?> compressAndGetFile(File file) async {
     var tempPath  =await getApplicationDocumentsDirectory();
     var result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path, tempPath.path+file.path.split("/").last,
