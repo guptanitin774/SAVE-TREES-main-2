@@ -37,22 +37,28 @@ class _SinglePhotoView extends State <SinglePhotoView> with  WidgetsBindingObser
                     });
                   },
                   child: PhotoView(
-                    imageProvider: FileImage( widget.photo[position]),
-                    loadFailedChild: Image(image: AssetImage("assests/image_loading.png"),),
+                    imageProvider: FileImage(widget.photo[position]),
                     minScale: PhotoViewComputedScale.contained * 0.8,
                     maxScale: 1.0,
                     gestureDetectorBehavior: HitTestBehavior.opaque,
                     enableRotation: false,
-                    loadingBuilder: (BuildContext context, ImageChunkEvent loadingProgress){
-                      if (loadingProgress == null) return Container();
+                    loadingBuilder: (BuildContext context, ImageChunkEvent? loadingProgress) {
+                      if (loadingProgress == null) return const SizedBox.shrink();
                       return Center(
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           backgroundColor: Colors.white54,
-                          valueColor: new AlwaysStoppedAnimation<Color>(Colors.green),
-                          value: loadingProgress.expectedTotalBytes != null ?
-                          loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null,
+                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                              : null,
                         ),
+                      );
+                    },
+                    errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+                      return Image.asset(
+                        "assets/image_loading.png",
+                        fit: BoxFit.cover,
                       );
                     },
                   ),

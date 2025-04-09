@@ -137,9 +137,11 @@ class _DiscussionFormFilter extends State<DiscussionFormFilter>{
       loopList.add(
         Padding(
           padding: const EdgeInsets.only(right: 8.0),
-          child: RaisedButton(
-            elevation: 8.0,
-            color: commonDiscussionFilters[i].selected? Colors.teal : Colors.white,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              elevation: 8.0,
+              backgroundColor: commonDiscussionFilters[i].selected ? Colors.teal : Colors.white,
+            ),
             child: Text(commonDiscussionFilters[i].value, style: TextStyle(color: commonDiscussionFilters[i].selected? Colors.white : Colors.black),),
             onPressed: () async{
               selectedItem(commonDiscussionFilters[i]);

@@ -238,7 +238,7 @@ class _SearchPlaces extends State<SearchPlaces>{
     return cityData.toList();
   }
 
-  Widget buildBar(BuildContext context) {
+  PreferredSizeWidget buildBar(BuildContext context) {
     return new AppBar(
       centerTitle: true,
       automaticallyImplyLeading: false,

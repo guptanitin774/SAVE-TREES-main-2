@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:naturesociety_new/BottomNavigation/BottomNavigation.dart';
 import 'package:naturesociety_new/BottomNavigation/UserMainPage.dart';
@@ -62,7 +62,7 @@ class _WatchlistState extends State<Watchlist>
             photos: json.decode(response.body)["incidentlist"][i]["photos"],
             userDetails: json.decode(response.body)["incidentlist"][i]["addedby"],
             createdDate: json.decode(response.body)["incidentlist"][i]["createddate"],
-            isAnonymous: json.decode(response.body)["incidentlist"][i]["isanonymous"],
+            isAnonymous: json.decode(response.body)["incidentlist"][i]["isanonymous"], time: '',
           ));
         //watchListList = json.decode(response.body)["incidentlist"].reversed.toList();
         watchListLoading = false;
@@ -137,11 +137,11 @@ class _WatchlistState extends State<Watchlist>
                     return AlertDialog(
                         content: Text('Are you sure, You want to remove this case from WatchList ?'),
                         actions: <Widget>[
-                          FlatButton(
+                          TextButton(
                             child: Text('Cancel'),
                             onPressed: () => Navigator.of(context).pop(false),
                           ),
-                          FlatButton(
+                          TextButton(
                               child: Text('Ok'),
                               onPressed: () {
                                 removeFromWatchList(watchListList[index].id);
@@ -172,7 +172,7 @@ class _WatchlistState extends State<Watchlist>
                       border: Border.all(color: Colors.black38, width: 1)),
                   child: GestureDetector(
                     onTap: ()async{
-                      bool needRefresh = await Navigator.push(context, MaterialPageRoute(builder: (context)=> CaseDetailedView(watchListList[index].id)));
+                      bool needRefresh = await Navigator.push(context, MaterialPageRoute(builder: (context)=> CaseDetailedView(watchListList[index].id, isSearch: true)));
                       print(index);
                       print(watchListList[index].id);
                       if(needRefresh){
@@ -278,7 +278,7 @@ class _WatchlistState extends State<Watchlist>
 
                         GestureDetector(
                           onTap: ()async{
-                            bool needRefresh = await Navigator.push(context, MaterialPageRoute(builder: (context)=> CaseDetailedView(watchListList[index].id)));
+                            bool needRefresh = await Navigator.push(context, MaterialPageRoute(builder: (context)=> CaseDetailedView(watchListList[index].id, isSearch: true)));
                             if(needRefresh){
                               updateTileDetails(watchListList[index].id, index);
                             }
@@ -292,21 +292,27 @@ class _WatchlistState extends State<Watchlist>
                                       (BuildContext context,int k){
                                     return
 
-                                    Image(image: CachedNetworkImageProvider(ApiCall.imageUrl+watchListList[index].photos[k]["photo"].toString())
-                                      ,fit:  BoxFit.cover,
-                                      loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            backgroundColor: Colors.white54,
-                                            valueColor: new AlwaysStoppedAnimation<Color>(Colors.green),
-                                            value: loadingProgress.expectedTotalBytes != null ?
-                                            loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                                                : null,
-                                          ),
-                                        );
-                                      },);
+                                    Image(
+                                        image: CachedNetworkImageProvider(
+                                          ApiCall.imageUrl + watchListList[index].photos[k]["photo"].toString(),
+                                        ),
+                                        fit: BoxFit.cover,
+                                        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            return child;
+                                          }
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              backgroundColor: Colors.white54,
+                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                              value: loadingProgress.expectedTotalBytes != null
+                                                  ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes!.toDouble())
+                                                  : null,
+                                            ),
+                                          );
+                                        },
+                                      );
                                   },
                                   itemCount: watchListList[index].photos.length,
                                   pagination: watchListList[index].photos.length > 1 ? SwiperPagination(): SwiperPagination(builder: SwiperPagination.rect),
@@ -329,7 +335,7 @@ class _WatchlistState extends State<Watchlist>
                                           , style: TextStyle(color: Colors.white, fontSize: 12),),
                                       ) : SizedBox.shrink(),
                                       SizedBox(width: watchListList[index].caseUpdates == null? 0: 8.0,),
-                                      watchListList[index].watchListCount == 0 || watchListList[index].watchListCount == null? SizedBox.shrink(): Container(
+                                      watchListList[index].watchListCount == 0? SizedBox.shrink(): Container(
                                         padding: EdgeInsets.all(4),
                                         decoration: BoxDecoration(
                                           color: Colors.black45,
@@ -419,7 +425,7 @@ class _WatchlistState extends State<Watchlist>
         body: isConnected ? SafeArea(
           child: watchListLoading ? ShimmerLoading.loadingCaseShimmer(context) : mainScreen(context)
         ) : NoConnection(
-          notifyParent: getWatchListItems,
+          notifyParent: getWatchListItems, key: UniqueKey(),
         )
       ) ,
     );

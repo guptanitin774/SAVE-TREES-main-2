@@ -8,10 +8,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:location/location.dart' as location;
+import 'package:geocoding/geocoding.dart';
+import 'package:naturesociety_new/LocationSettings/SearchPlaces.dart';
 import 'package:naturesociety_new/SettingsScreen/SearchPlaces.dart';
 import 'package:naturesociety_new/Utils/MaterialComponets.dart';
 import 'package:naturesociety_new/Utils/NetworkCall.dart';
@@ -19,7 +21,6 @@ import 'package:naturesociety_new/Widgets/CommonWidgets.dart';
 import 'package:naturesociety_new/Widgets/NoConnection.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart' as appHandler;
-import 'package:search_map_place/search_map_place.dart';
 
 class EditCurrentLocation extends StatefulWidget
 {
@@ -52,22 +53,32 @@ class _EditCurrentLocation extends State<EditCurrentLocation>
   bool isLoading = true;
   var placeLocation ;
 
-  String placeDetail;
+  late String placeDetail;
   _getAddressFromLatLng() async {
     _locationController.text = widget.locationDetails["name"];
     selectedKm =(widget.locationDetails["range"] / 1000) .toInt();
     try {
-      final coordinates = new Coordinates(widget.locationDetails["location"][1],widget.locationDetails["location"][0]);
-      var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
-      var first = addresses.first;
-      print("${first.featureName} : ${first.addressLine}");
+      // List<Placemark> placemarks = await placemarkFromCoordinates(
+      //     widget.locationDetails["location"][1],
+      //     widget.locationDetails["location"][0]);
+
+      double latitude = widget.locationDetails["location"][1];
+      double longitude = widget.locationDetails["location"][0];
+      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+      // var geocoder = await Geocoder2.getDataFromCoordinates(
+      //     latitude: widget.locationDetails["location"][1],
+      //     longitude: widget.locationDetails["location"][0],
+      //     googleMapApiKey: "AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw");
+      // var addresses = geocoder.address;
+      var first = placemarks.first;
+      print("${first.street} : ${first.administrativeArea}");
 
 
       if(mounted){
         http
-            .get("https://maps.googleapis.com/maps/api/geocode/json?" +
-            "latlng=${widget.locationDetails["location"][1]},${widget.locationDetails["location"][0]}&" +
-            "key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw").then((response) {
+            .get(Uri.parse("https://maps.googleapis.com/maps/api/geocode/json?"
+            "latlng=${widget.locationDetails["location"][1]},${widget.locationDetails["location"][0]}&"
+            "key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw")).then((response) {
           if (response.statusCode == 200) {
             var responseJson = jsonDecode(response.body)["results"];
             placeDetail = "${responseJson[1]["address_components"][0]["long_name"]} ,${responseJson[2]["address_components"][0]["long_name"]}"
@@ -82,8 +93,8 @@ class _EditCurrentLocation extends State<EditCurrentLocation>
           print(error);
         });
         setState(() {
-          lat = addresses.first.coordinates.latitude;
-          long = addresses.first.coordinates.longitude;
+          // lat = addresses.first.coordinates.latitude;
+          // long = addresses.first.coordinates.longitude;
           placeLocation = LatLng(widget.locationDetails["location"][1], widget.locationDetails["location"][0]);
           markers.add(Marker(
             position: LatLng(widget.locationDetails["location"][1], widget.locationDetails["location"][0]),
@@ -110,15 +121,15 @@ class _EditCurrentLocation extends State<EditCurrentLocation>
   }
 
 
-  Location location = new Location();
-  bool _serviceEnabled;
-  PermissionStatus _permissionGranted;
-  LocationData _locationData;
+  location.Location locationInstance = new location.Location();
+  late bool _serviceEnabled;
+  late PermissionStatus _permissionGranted;
+  late LocationData _locationData;
 
   Future<void> locationPermission() async{
-    _serviceEnabled = await location.serviceEnabled();
+    _serviceEnabled = await locationInstance.serviceEnabled();
     if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
+      _serviceEnabled = await locationInstance.requestService();
       if (!_serviceEnabled) {
         Navigator.pop(context);
         return;
@@ -127,23 +138,23 @@ class _EditCurrentLocation extends State<EditCurrentLocation>
     permissionGranted();
   }
   permissionGranted() async{
-    _permissionGranted = await location.hasPermission();
+    _permissionGranted = await locationInstance.hasPermission();
 
     if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
+      _permissionGranted = await locationInstance.requestPermission();
       if (_permissionGranted != PermissionStatus.granted) {
         Fluttertoast.showToast(msg: "Location permission not granted");
         Navigator.of(context).pop(false);
-        await location.hasPermission();
+        await locationInstance.hasPermission();
         appHandler.openAppSettings();
         return;
       }
     }
-    _locationData = await location.getLocation();
+    _locationData = await locationInstance.getLocation();
     _getAddressFromLatLng();
   }
 
-  Timer timer;
+  late Timer timer;
   bool isConnected = true;
 
   Future<void> checkConnection() async{
@@ -162,8 +173,8 @@ class _EditCurrentLocation extends State<EditCurrentLocation>
   }
   List choices=["Home", "Office", "Others"];
 
-  String locationChoice = "",selected1;
-  String myPlaceHolder;
+  late String locationChoice = "",selected1;
+  late String myPlaceHolder;
 
   List<int> radiusKm = [1,5,10,20,50];
   int selectedKm = 1;
@@ -209,12 +220,12 @@ class _EditCurrentLocation extends State<EditCurrentLocation>
                     children: <Widget>[
                       IgnorePointer(
                         ignoring : true,
-                        child: SearchMapPlaceWidget(
-                          placeholder: placeDetail ?? "Search Places..",
-                          placeType: PlaceType.cities,
-                          strictBounds: true,
-                          apiKey: apiKEY,
-                          hasClearButton: true,
+                        child: SearchPlaces(
+                          // placeholder: placeDetail ?? "Search Places..",
+                          // placeType: PlaceType.cities,
+                          // strictBounds: true,
+                          // apiKey: apiKEY,
+                          // hasClearButton: true,
 
                         ),
                       ),
@@ -387,8 +398,8 @@ class _EditCurrentLocation extends State<EditCurrentLocation>
           title: Text("Add a location from map", style: TextStyle(color: Colors.teal, fontWeight: FontWeight.w600),),
           elevation: 5.0,
         ),
-        body: !isConnected ? NoConnection( notifyParent: locationPermission,) : isLoading ?
-        CommonWidgets.progressIndicator(context): mainScreen(context), 
+        body: !isConnected ? NoConnection( notifyParent: locationPermission, key: UniqueKey()) : isLoading ?
+        CommonWidgets.progressIndicator(context): mainScreen(context),
 
 
       ),
@@ -422,9 +433,9 @@ class _EditCurrentLocation extends State<EditCurrentLocation>
 
 class LocationResult {
 
-  String name; // or road
-  String locality;
-  LatLng latLng;
-  String formattedAddress;
-  String placeId;
+  late String name; // or road
+  late String locality;
+  late LatLng latLng;
+  late String formattedAddress;
+  late String placeId;
 }

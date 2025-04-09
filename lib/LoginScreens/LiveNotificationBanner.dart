@@ -13,7 +13,7 @@ class LiveNearByNotification extends StatefulWidget{
   _LiveNearByNotification createState() => _LiveNearByNotification();
 }
 class _LiveNearByNotification extends State<LiveNearByNotification>{
-  DateTime currentBackPressedTime;
+  late DateTime currentBackPressedTime;
    Future<bool> onWillPop()
   {
     DateTime now = DateTime.now();

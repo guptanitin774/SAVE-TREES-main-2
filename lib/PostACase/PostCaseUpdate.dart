@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:circular_check_box/circular_check_box.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -40,9 +39,9 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
   }
 
   Location location = new Location();
-  bool _serviceEnabled;
-  PermissionStatus _permissionGranted;
-  LocationData _locationData;
+  late bool _serviceEnabled;
+  late PermissionStatus _permissionGranted;
+  late LocationData _locationData;
 
   locationPermission() async {
     _serviceEnabled = await location.serviceEnabled();
@@ -107,13 +106,13 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
     }
   }
 
-  Map profileDetails;
+  late Map profileDetails;
   var userName = "";
 
   Future<void> setDefaultUser() async {
-    userName = await LocalPrefManager.getUserName();
-    bool anonymous = await LocalPrefManager.getAnonymity();
-    if (anonymous || anonymous == null)
+    userName = (await LocalPrefManager.getUserName())!;
+    bool? anonymous = await LocalPrefManager.getAnonymity();
+    if (anonymous! || anonymous == null)
       selectedUserType = "Anonymous";
     else{
       if(userName == "" || userName == null)
@@ -250,7 +249,7 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
     );
   }
 
-  List<File> fileList = new List();
+  List<File> fileList = [];
 
   Widget casePhotos(BuildContext context) {
     return  StoreConnector<AppState, AppState>(
@@ -285,7 +284,7 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
                     ),
                     child: InkWell(
                       onTap: () async {
-                        List<File> returnFileList = new List();
+                        List<File> returnFileList = [];
                         try {
                           returnFileList = await Navigator.push(
                               context,
@@ -298,7 +297,7 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
                             }
                           setState(() {});
                         } catch (e) {
-                          Fluttertoast.showToast(msg: e);
+                          Fluttertoast.showToast(msg: e.toString());
                         }
                       },
                       child: Stack(
@@ -388,13 +387,12 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
     try {
 
       markers.add(Marker(
-        position: LatLng(_locationData.latitude, _locationData.longitude),
+        position: LatLng(_locationData.latitude ?? 0.0, _locationData.longitude ?? 0.0),
         markerId: MarkerId("selected-location"),));
 
-      http
-          .get("https://maps.googleapis.com/maps/api/geocode/json?" +
-          "latlng=${_locationData.latitude},${_locationData.longitude}&" +
-          "key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw")
+      http.get(Uri.parse("https://maps.googleapis.com/maps/api/geocode/json?" +
+          "latlng=${_locationData.latitude ?? 0.0},${_locationData.longitude ?? 0.0}&" +
+          "key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw"))
           .then((response) {
         if (response.statusCode == 200) {
           var responseJson = jsonDecode(response.body)["results"];
@@ -447,7 +445,7 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
               new Factory<OneSequenceGestureRecognizer>(() => new ScaleGestureRecognizer(),),
             ].toSet(),
             initialCameraPosition: CameraPosition(
-              target: LatLng(_locationData.latitude, _locationData.longitude),
+              target: LatLng(_locationData.latitude ?? 0.0, _locationData.longitude ?? 0.0),
               zoom: 15.77,
             ),
           ),
@@ -557,7 +555,7 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
               userName == "" || userName == null ? SizedBox.shrink():  Radio(
                 value: userName,
                 groupValue: selectedUserType,
-                onChanged: radioButtonChanges,
+                onChanged: (String? value) => radioButtonChanges(value ?? ""),
               ),
               userName == "" || userName == null ? SizedBox.shrink(): GestureDetector(
                 onTap: () => radioButtonChanges(userName),
@@ -569,7 +567,7 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
               Radio(
                 value: 'Anonymous',
                 groupValue: selectedUserType,
-                onChanged: radioButtonChanges,
+                onChanged: (String? value) => radioButtonChanges(value ?? ""),
               ),
               GestureDetector(
                 onTap: ()=> radioButtonChanges("Anonymous"),
@@ -584,7 +582,7 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
       ],
     );
   }
-  String choice;
+  late String choice;
   void radioButtonChanges(String value) async{
     SharedPreferences preference = await SharedPreferences.getInstance();
     setState(() {
@@ -599,7 +597,7 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
           preference.setBool("anonymous",false);
           break;
         default:
-          choice = null;
+          choice = "";
           preference.setBool("anonymous",true);
       }
       debugPrint(choice); //Debug the choice in console
@@ -612,19 +610,20 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
     for (int i = 0; i < reasonsList.length; i++)
       listItems.add(Row(
         children: <Widget>[
-          CircularCheckBox(
+          Checkbox(
             value: reasonsList[i].selected,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            onChanged: (bool val) {
+            onChanged: (bool? val) {
               setState(() {
                 if (reasonsList[i].selected)
                   reasonsList[i].setter(false);
                 else
                   reasonsList[i].setter(true);
 
-                val
-                    ? selectedReason.add(reasonsList[i])
-                    : selectedReason.remove(reasonsList[i]);
+                if (val == true)
+                  selectedReason.add(reasonsList[i]);
+                else
+                  selectedReason.remove(reasonsList[i]);
               });
             },
           ),
@@ -652,7 +651,7 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
   }
 
   List postUserType = [];
-  String selectedUserType;
+  late String selectedUserType;
 
 
 
@@ -776,7 +775,7 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
 
                                       controller: cutCount[i],
                                       maxLength: 4,
-                                      maxLengthEnforced: true,
+                                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
                                       decoration: InputDecoration(
                                         //contentPadding: EdgeInsets.all(5),
                                           enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white),),
@@ -922,7 +921,7 @@ class _PostCaseUpdate extends State<PostCaseUpdate> {
     Map<String,String> data = {
       'id':id,
     };
-    request.headers.addAll({'Content-Type': 'application/form-data', 'x-auth-token': to});
+    request.headers.addAll({'Content-Type': 'application/form-data', 'x-auth-token': to ?? ''});
     request.fields.addAll(data);
 
     if (photoArray != null) {

@@ -149,7 +149,7 @@ class _UserPostedCaseDetails extends State<UserPostedCaseDetails> {
           bool needRefresh = await Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => CaseDetailedView(caseList[index].id)));
+                  builder: (context) => CaseDetailedView(caseList[index].id, isSearch: true)));
           if (needRefresh) {
             updateTileDetails(caseList[index].id, index);
             setState(() {});
@@ -340,7 +340,7 @@ class _UserPostedCaseDetails extends State<UserPostedCaseDetails> {
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
-                        CaseDetailedView(caseList[index].id)));
+                        CaseDetailedView(caseList[index].id, isSearch: true)));
             if (needRefresh) {
               updateTileDetails(caseList[index].id, index);
               setState(() {});
@@ -682,7 +682,7 @@ class _UserPostedCaseDetails extends State<UserPostedCaseDetails> {
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
-                        CaseDetailedView(caseList[index].id)));
+                        CaseDetailedView(caseList[index].id, isSearch: true)));
             if (needRefresh) {
               updateTileDetails(caseList[index].id, index);
             }

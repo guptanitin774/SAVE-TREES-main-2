@@ -321,7 +321,7 @@ class _SignUp extends State<SignUp> {
           ),
         ),
         body: !isConnected
-            ? NoConnection(notifyParent: connectionCheck,)
+            ? NoConnection(notifyParent: connectionCheck, key: UniqueKey())
             : isLoading
             ? CommonWidgets.progressIndicator(context)
             : myBody(context));

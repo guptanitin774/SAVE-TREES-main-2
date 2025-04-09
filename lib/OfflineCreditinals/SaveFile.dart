@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io' as Io;
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:image/image.dart';
+import 'package:image/image.dart' as img;
 
 import 'package:path_provider/path_provider.dart';
 class SaveFile {
@@ -33,12 +34,11 @@ class SaveFile {
     final file = await getImageFromNetwork(url);
     //retrieve local path for device
     var path = await _localPath;
-    Image image = decodeImage(file.readAsBytesSync());
+    img.Image image = img.decodeImage(file.readAsBytesSync())!;
+    img.Image thumbnail = img.copyResize(image, height: 500, width: 500);
 
-    Image thumbnail = copyResize(image, height: 500, width: 500);
-
-    // Save the thumbnail as a PNG.
-    return new Io.File('$path/${DateTime.now().toUtc().toIso8601String()}.png')
-      ..writeAsBytesSync(encodePng(thumbnail));
+// Save the thumbnail as a PNG.
+   return Io.File('$path/${DateTime.now().toUtc().toIso8601String()}.png')
+     ..writeAsBytesSync(img.encodePng(thumbnail));
   }
 }

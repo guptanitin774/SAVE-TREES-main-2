@@ -27,17 +27,17 @@ class CaseViewInDiscussion extends StatefulWidget {
   final caseId;
   final tabValue;
   final bool isSearch;
-  CaseViewInDiscussion(this.caseId, { this.isSearch,this.tabValue});
+  CaseViewInDiscussion(this.caseId, { required this.isSearch,this.tabValue});
 
   _CaseViewInDiscussion createState()=> _CaseViewInDiscussion();
 }
 class _CaseViewInDiscussion extends State<CaseViewInDiscussion> with SingleTickerProviderStateMixin , AutomaticKeepAliveClientMixin <CaseViewInDiscussion>{
   @override
   bool get wantKeepAlive => true;
-  Map caseDetails;
+  late Map caseDetails;
 
   int initialIndexTab = 0;
-  TabController _tabBar ;
+  late TabController _tabBar ;
 
 
   navigateController(){
@@ -58,13 +58,13 @@ class _CaseViewInDiscussion extends State<CaseViewInDiscussion> with SingleTicke
 
   bool dataLoading = true, authError = false;
   var samList , token;
-  PermissionStatus _permissionGranted;
+  late PermissionStatus _permissionGranted;
   Location location = new Location();
   Future<void> getIncidentFullView() async{
     var t= await LocalPrefManager.getToken();
     print(t);
 
-    Position   currentLocation ;
+    Position currentLocation = await Geolocator.getCurrentPosition();
     if(await location.serviceEnabled() && _permissionGranted == PermissionStatus.granted)
       currentLocation = await Geolocator.getCurrentPosition();
     else{}
@@ -133,8 +133,8 @@ class _CaseViewInDiscussion extends State<CaseViewInDiscussion> with SingleTicke
     String text = "Checkout this case about $treeCount "+"${treeCount >1 ?"trees":"tree"}"+" at "+
         caseDetails["locationname"]+", using Save Tress app. (Case ID: ${caseDetails["caseidentifier"]==null?
     caseDetails["caseid"] : caseDetails["caseidentifier"]})";
-    final RenderBox box = context.findRenderObject();
-    Share.share(text+"\n"+linkMessage,
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    if (box == null) return;    Share.share(text+"\n"+linkMessage,
         sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
   }
 
@@ -316,13 +316,13 @@ class _CaseViewInDiscussion extends State<CaseViewInDiscussion> with SingleTicke
 
 }
 class Controller{
-  Future<void> Function() selection;
+  late Future<void> Function() selection;
   var key;
 }
 
 class CaseGallery extends StatefulWidget{
   final caseDetails;
-  CaseGallery(this.caseDetails,{Key key,}) : super(key: key);
+  CaseGallery(this.caseDetails,{required Key key,}) : super(key: key);
 
   _CaseGallery createState()=> _CaseGallery();
 }
@@ -389,19 +389,19 @@ class _CaseGallery extends State<CaseGallery>{
                                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                                           child: Image(image: CachedNetworkImageProvider(ApiCall.imageUrl + widget.caseDetails["photos"][index]["photo"])
                                             ,fit:  BoxFit.cover,
-                                            loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
-                                              if (loadingProgress == null) return child;
-                                              return Center(
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  backgroundColor: Colors.white54,
-                                                  valueColor: new AlwaysStoppedAnimation<Color>(Colors.green),
-                                                  value: loadingProgress.expectedTotalBytes != null ?
-                                                  loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
-                                                      : null,
-                                                ),
-                                              );
-                                            },)
+                                              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                                if (loadingProgress == null) return child;
+                                                return Center(
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                    backgroundColor: Colors.white54,
+                                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                                    value: loadingProgress.expectedTotalBytes != null
+                                                        ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                                        : null,
+                                                  ),
+                                                );
+                                              },)
                                       )),
                                 ),
                               )));
@@ -475,15 +475,15 @@ class _CaseGallery extends State<CaseGallery>{
                                     child:
                                     Image(image: CachedNetworkImageProvider(ApiCall.imageUrl + widget.caseDetails["updates"][i]["photos"][index]["photo"])
                                         ,fit:  BoxFit.cover,
-                                        loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
+                                        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                                           if (loadingProgress == null) return child;
                                           return Center(
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2,
                                               backgroundColor: Colors.white54,
-                                              valueColor: new AlwaysStoppedAnimation<Color>(Colors.green),
-                                              value: loadingProgress.expectedTotalBytes != null ?
-                                              loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                              value: loadingProgress.expectedTotalBytes != null
+                                                  ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
                                                   : null,
                                             ),
                                           );

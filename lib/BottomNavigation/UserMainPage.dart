@@ -39,8 +39,8 @@ var length = 0;
 String selectedChoice = "";
 var searchData;
 
-String searchTerm;
-String zeroCountMessage;
+String searchTerm = "";
+String zeroCountMessage = "";
 
 int currentPageCount = 1, totalIncidentCount = 0;
 var myUserId;
@@ -79,7 +79,7 @@ class _HomePage extends State<HomePage> {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  CaseDetailedView(deepLink.path.substring(1))));
+                  CaseDetailedView(deepLink.path.substring(1), isSearch: true)));
     }
 
     FirebaseDynamicLinks.instance.onLink;
@@ -489,7 +489,7 @@ class _HomePage extends State<HomePage> {
                                                           builder: (context) =>
                                                               Locations()));
                                               if (needRefresh) {
-                                                selectedChoice = null;
+                                                choice = "";
                                                 showSavedLocations();
                                               } else {
                                                 selectedChoice =
@@ -1976,7 +1976,7 @@ class _HomePage extends State<HomePage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => CaseDetailedView(
-                                      offlineCredentials[index]["caseId"]))),
+                                      offlineCredentials[index]["caseId"], isSearch: true))),
                           child: Container(
                             height: 200,
                             width: double.infinity,
@@ -2059,8 +2059,7 @@ class _HomePage extends State<HomePage> {
             locationName: json.decode(response.body)["data"][i]["locationname"],
             caseId: json
                         .decode(response.body)["data"][i]["caseidentifier"]
-                        .toString() ==
-                    null
+                        .toString() == null
                 ? json.decode(response.body)["data"][i]["caseid"]
                 : json.decode(response.body)["data"][i]["caseidentifier"],
             userName: json.decode(response.body)["data"][i]["locationname"],
@@ -2301,7 +2300,7 @@ class _HomePage extends State<HomePage> {
           Navigator.pop(context);
           break;
         default:
-          choice = null;
+          choice = "";
           preference.setBool("anonymous", true);
       }
       debugPrint(choice); //Debug the choice in console

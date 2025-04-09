@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -28,7 +28,7 @@ import 'dart:ui' as ui;
 class CaseView extends StatefulWidget{
   void Function() navigation;
   final caseDetails;
-  CaseView(this.navigation, this.caseDetails, {Key key,}) : super(key: key);
+  CaseView(this.navigation, this.caseDetails, {required Key key,}) : super(key: key);
 
   _CaseView createState()=> _CaseView();
 }
@@ -44,15 +44,15 @@ class _CaseView extends State <CaseView>{
   var caseChart;
   bool isCaseHasUpdates = false;
   int sliderValue =  0;
-  int watchCount, commentCount, updateCount, reportCount;
+  late int watchCount, commentCount, updateCount, reportCount;
 
-double distance;
-  Uint8List markerIcon;
+late double distance;
+  late Uint8List markerIcon;
   Future<Uint8List> getBytesFromAsset(String path, int width) async {
     ByteData data = await rootBundle.load(path);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png)).buffer.asUint8List();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))?.buffer.asUint8List() ?? Uint8List(0);
   }
 
   @override
@@ -227,15 +227,15 @@ List recentComments =[];
                                 (BuildContext context,int k){
                               return InteractiveViewer(
                                 child: Image(image: CachedNetworkImageProvider(ApiCall.imageUrl+caseChart["photos"][k]["photo"].toString()) ,fit:  BoxFit.cover,
-                                  loadingBuilder:(BuildContext context, Widget child,ImageChunkEvent loadingProgress) {
+                                  loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
                                     if (loadingProgress == null) return child;
                                     return Center(
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         backgroundColor: Colors.white54,
-                                        valueColor: new AlwaysStoppedAnimation<Color>(Colors.green),
-                                        value: loadingProgress.expectedTotalBytes != null ?
-                                        loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                                        value: loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
                                             : null,
                                       ),
                                     );
@@ -560,7 +560,7 @@ List recentComments =[];
                     SizedBox.shrink(),
                     SizedBox(height: caseChart["description"] != null  ?  10.0 :  0.0,),
                     caseChart["description"] != null  ?Container(child:  ReadMoreText(
-                      caseChart["description"]?? "",
+                      caseChart["description"] ?? "",
                       trimLines: 5,
                       colorClickableText: Colors.teal,
                       trimMode: TrimMode.Line,
@@ -568,6 +568,11 @@ List recentComments =[];
                       trimExpandedText: '   show less',
                       textAlign: TextAlign.justify,
                       style: TextStyle(color: Colors.black),
+                      key: Key('readMoreText'),
+                      textDirection: TextDirection.ltr,
+                      locale: Locale('en'),
+                      textScaleFactor: 1.0,
+                      semanticsLabel: 'Read more about the case description',
                     ),
 
                     ): SizedBox.shrink(),
@@ -679,10 +684,11 @@ List recentComments =[];
             children: [
               CircleAvatar(
                 radius: 15, backgroundColor: Colors.grey,
-                backgroundImage:
-                caseChart["comments"][i]['isanonymous']?AssetImage('assets/natureicon.png'):
-                caseChart["comments"][i]["user"]["photo"] !=null? CachedNetworkImageProvider(ApiCall.imageUrl+caseChart["comments"][i]["user"]["photo"] ?? " "):
-                null,
+                backgroundImage: caseChart["comments"][i]['isanonymous']
+                    ? const AssetImage('assets/natureicon.png') as ImageProvider<Object>?
+                    : caseChart["comments"][i]["user"]["photo"] != null
+                    ? CachedNetworkImageProvider(ApiCall.imageUrl + (caseChart["comments"][i]["user"]["photo"] ?? ""))
+                    : null,
               ),
               SizedBox(width: 10.0,),
               Expanded(
@@ -1030,14 +1036,18 @@ List recentComments =[];
         widget.caseDetails["locationname"]+", using Save Tress app. (Case ID: ${widget.caseDetails["caseidentifier"] == null?
     widget.caseDetails["caseid"] :widget.caseDetails["caseidentifier"]})";
 
-    final RenderBox box = context.findRenderObject();
-    Share.share(text+"\n"+linkMessage,
-        sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    if (box != null) {
+      Share.share(
+        text + "\n" + linkMessage,
+        sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+      );
+    }
   }
   Location location = new Location();
-  bool _serviceEnabled;
-  PermissionStatus _permissionGranted;
-  LocationData _locationData;
+  late bool _serviceEnabled;
+  late PermissionStatus _permissionGranted;
+  late LocationData _locationData;
 
   locationPermission() async{
 

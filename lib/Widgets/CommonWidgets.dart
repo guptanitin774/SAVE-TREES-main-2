@@ -1429,7 +1429,7 @@ class CommonWidgets {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      CaseDetailedView(navigateCase)));
+                                      CaseDetailedView(navigateCase, isSearch: true)));
                           //  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> BottomNavPage()));
                         },
                         child: Align(

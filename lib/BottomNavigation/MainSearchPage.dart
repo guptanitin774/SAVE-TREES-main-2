@@ -150,7 +150,7 @@ bool containsRecentSearch = false;
                           onTap: () async{
                             suggestionBox[index].type == 'own' ?
                             returnSearchResult(suggestionBox[index].dataSet.toLowerCase()):
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=> CaseDetailedView(suggestionBox[index].dataSet["_id"])));
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=> CaseDetailedView(suggestionBox[index].dataSet["_id"], isSearch: true)));
                           },
                           child: Row(
                             children: <Widget>[

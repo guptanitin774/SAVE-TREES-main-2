@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geocoder/geocoder.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
 import 'package:naturesociety_new/LocationSettings/AddRadiusLocation.dart';
@@ -17,7 +17,7 @@ import 'package:naturesociety_new/Utils/NetworkCall.dart';
 import 'package:naturesociety_new/Widgets/CommonWidgets.dart';
 import 'package:naturesociety_new/Widgets/NoConnection.dart';
 import 'package:permission_handler/permission_handler.dart' as appHandler;
-
+import 'package:location/location.dart' as location;
 
 class AddBasicLocations extends StatefulWidget{
   _AddBasicLocations createState()=> _AddBasicLocations();
@@ -34,15 +34,15 @@ class _AddBasicLocations extends State<AddBasicLocations>{
 
   }
 
-  Location location = new Location();
-  bool _serviceEnabled;
-  PermissionStatus _permissionGranted;
-  LocationData _locationData;
+  location.Location locationInstance = new location.Location();
+  late bool _serviceEnabled;
+  late PermissionStatus _permissionGranted;
+  late LocationData _locationData;
 
   locationPermission() async{
-    _serviceEnabled = await location.serviceEnabled();
+    _serviceEnabled = await locationInstance.serviceEnabled();
     if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
+      _serviceEnabled = await locationInstance.requestService();
       if (!_serviceEnabled) {
         Navigator.pop(context);
         return;
@@ -51,26 +51,26 @@ class _AddBasicLocations extends State<AddBasicLocations>{
     permissionGranted();
   }
   permissionGranted() async{
-    _permissionGranted = await location.hasPermission();
+    _permissionGranted = await locationInstance.hasPermission();
     print(_permissionGranted);
     if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
+      _permissionGranted = await locationInstance.requestPermission();
       if (_permissionGranted != PermissionStatus.granted) {
         Fluttertoast.showToast(msg: "Location permission not granted");
         Navigator.pop(context);
-        await location.hasPermission();
+        await locationInstance.hasPermission();
         appHandler.openAppSettings();
         return;
       }
     }
-    _locationData = await location.getLocation();
+    _locationData = await locationInstance.getLocation();
     myCurrentLocationUpdate();
   }
 
   var locations; bool isConnected = true ;
 
 
-  Position position;
+  late Position position;
 
   Future<void> myCurrentLocationUpdate() async{
 
@@ -78,15 +78,14 @@ class _AddBasicLocations extends State<AddBasicLocations>{
     var myCity, myState ;
     try{
       if(mounted) {
-        final coordinates = new Coordinates(_locationData.latitude,_locationData.longitude);
-        var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
-        var first = addresses.first;
-        print("${first.featureName} : ${first.addressLine}");
+        List<Placemark> placemarks = await placemarkFromCoordinates(_locationData.latitude!, _locationData.longitude!);
+        var first = placemarks.first;
+        print("${first.name} : ${first.street}");
 
        //  var address = await Geolocator .placemarkFromCoordinates(_locationData.latitude,_locationData.longitude);
 
-        myState = addresses.first.adminArea;
-        myCity = addresses.first.locality;
+        // myState = addresses.first.adminArea;
+        // myCity = addresses.first.locality;
          CustomResponse response = await ApiCall.makeGetRequestToken("location/search?keyword=$myCity");
          print(json.decode(response.body));
          if(response.status == 200){
@@ -101,7 +100,7 @@ class _AddBasicLocations extends State<AddBasicLocations>{
              }
            }
            else{
-             addPlaceManually(addresses);
+             addPlaceManually(first);
            }
          }
 
@@ -211,13 +210,13 @@ class _AddBasicLocations extends State<AddBasicLocations>{
         new AlertDialog(
           content: new Text("Do you want to Skip adding Locations? "),
           actions: [
-            FlatButton(
+            TextButton(
               child: new Text("CANCEL"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
+            TextButton(
               child: new Text("OK"),
               onPressed: () {
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LiveNearByNotification()));
@@ -250,7 +249,7 @@ class _AddBasicLocations extends State<AddBasicLocations>{
         ),
 
         body:!isConnected ? NoConnection(
-          notifyParent: getLocations,
+          notifyParent: getLocations, key: UniqueKey(),
         ) : isLoading  ? CommonWidgets.progressIndicator(context) : screen(context),
 
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -448,13 +447,13 @@ class _AddBasicLocations extends State<AddBasicLocations>{
         new AlertDialog(
           content: new Text("Do you want to remove this location ?"),
           actions: [
-            FlatButton(
+            TextButton(
               child: new Text("CANCEL"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
+            TextButton(
               child: new Text("OK"),
               onPressed: () {
                 removeUserLocation(id);

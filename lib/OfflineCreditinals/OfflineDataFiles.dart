@@ -3,9 +3,12 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geocoder/geocoder.dart';
+import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:naturesociety_new/OfflineCreditinals/FullViewOfflineCase.dart';
 import 'package:naturesociety_new/SimilarCases/ListSimilarCases.dart';
@@ -92,7 +95,7 @@ class _OfflineDataFiles extends State<OfflineDataFiles> {
     });
   }
 
-  Position position;
+  late Position position;
   var lat, lon;
 
 
@@ -105,15 +108,15 @@ class _OfflineDataFiles extends State<OfflineDataFiles> {
       isLoading = true;
     });
 
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(lat, lon));
-    var first = addresses.first;
-    print("${first.featureName} : ${first.addressLine}");
+    List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
+    var first = placemarks.first;
+    print("${first.administrativeArea} : ${first.street}");
     //placeMark = await Geolocator().placemarkFromCoordinates(lat, lon);
 
-   var response = await  http
-        .get("https://maps.googleapis.com/maps/api/geocode/json?" +
-        "latlng=$lat,$lon&" +
-        "key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw");
+    var response = await http.get(Uri.parse(
+        "https://maps.googleapis.com/maps/api/geocode/json?" +
+            "latlng=$lat,$lon&" +
+            "key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw"));
     if (response.statusCode == 200) {
       var responseJson = jsonDecode(response.body)["results"];
       placeDetail =  "${responseJson[0]["formatted_address"]} ";
@@ -133,14 +136,14 @@ class _OfflineDataFiles extends State<OfflineDataFiles> {
     });
     var placeDetails;
 
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(lat, lon));
-    var first = addresses.first;
-    print("${first.featureName} : ${first.addressLine}");
+    List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
+    var first = placemarks.first;
+    print("${first.administrativeArea} : ${first.street}");
 
-    var response = await  http
-        .get("https://maps.googleapis.com/maps/api/geocode/json?" +
-        "latlng=$lat,$lon&" +
-        "key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw");
+    var response = await http.get(Uri.parse(
+        "https://maps.googleapis.com/maps/api/geocode/json?" +
+            "latlng=$lat,$lon&" +
+            "key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw"));
     if (response.statusCode == 200) {
       var responseJson = jsonDecode(response.body)["results"];
       placeDetails =  "${responseJson[0]["formatted_address"]} ";
@@ -217,11 +220,11 @@ class _OfflineDataFiles extends State<OfflineDataFiles> {
                         title: Text('Delete'),
                         content: Text('Are you sure, You want to remove this case? '),
                         actions: <Widget>[
-                          FlatButton(
+                          TextButton(
                             child: Text('Cancel'),
                             onPressed: () => Navigator.of(context).pop(false),
                           ),
-                          FlatButton(
+                          TextButton(
                               child: Text('Ok'),
                               onPressed: () {
                                 removeCase(index);
@@ -463,7 +466,7 @@ class _OfflineDataFiles extends State<OfflineDataFiles> {
   }
 
 
-  int removeIndex;
+  late int removeIndex;
   void setLocalStorage(var data, var postId, var caseDetails) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     storedValues = prefs.getString('offlineList');

@@ -34,22 +34,27 @@ class _GalleryView extends State<GalleryView>{
                     });
                   },
                   child: PhotoView(
-                    imageProvider: NetworkImage(ApiCall.imageUrl+widget.imageList[position]["photo"]),
-                    loadFailedChild: Image(image: AssetImage("assests/image_loading.png"),),
-                    minScale: PhotoViewComputedScale.contained * 0.8,
-                    maxScale: 1.0,
-                    gestureDetectorBehavior: HitTestBehavior.opaque,
-                    enableRotation: false,
-                    loadingBuilder: (BuildContext context, ImageChunkEvent loadingProgress){
+                    imageProvider: NetworkImage(
+                      ApiCall.imageUrl + widget.imageList[position]["photo"],
+                    ),
+                    loadingBuilder: (BuildContext context, ImageChunkEvent? loadingProgress) {
                       if (loadingProgress == null) return Container();
                       return Center(
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           backgroundColor: Colors.white54,
-                          valueColor: new AlwaysStoppedAnimation<Color>(Colors.green),
-                          value: loadingProgress.expectedTotalBytes != null ?
-                          loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                              (loadingProgress.expectedTotalBytes ?? 1)
+                              : null,
                         ),
+                      );
+                    },
+                    errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+                      return Image.asset(
+                        "assets/image_loading.png",
+                        fit: BoxFit.cover,
                       );
                     },
                   ),

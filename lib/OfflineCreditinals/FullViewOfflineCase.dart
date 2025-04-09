@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
-
-import 'package:geocoder/geocoder.dart';
+import 'package:location/location.dart' as location_package;
+import 'package:geocoding/geocoding.dart' as geocoding;
+import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -33,7 +34,7 @@ class FullViewOfflineCase extends StatefulWidget {
 
 class _FullViewOfflineCase extends State<FullViewOfflineCase> {
   final Set<Marker> markers = Set();
-  Timer timer;
+  late Timer timer;
   @override
   void initState() {
     super.initState();
@@ -78,7 +79,7 @@ class _FullViewOfflineCase extends State<FullViewOfflineCase> {
 
   Future<bool> onWillPopScope() async {
     Navigator.of(context).pop(false);
-    return Text("") ?? false;
+    return false;
   }
 
   @override
@@ -416,6 +417,11 @@ class _FullViewOfflineCase extends State<FullViewOfflineCase> {
                   trimExpandedText: '   show less',
                   textAlign: TextAlign.justify,
                   style: TextStyle(color: Colors.black),
+                  key: Key('readMoreText'),
+                  textDirection: TextDirection.ltr,
+                  locale: Locale('en'),
+                  textScaleFactor: 1.0,
+                  semanticsLabel: 'Read more about the description',
                 ),
               )
                   : SizedBox.shrink(),
@@ -481,20 +487,19 @@ class _FullViewOfflineCase extends State<FullViewOfflineCase> {
   }
 
   var placeName;
-  Position position;
+  late Position position;
 
 
   Future<void> getLocationName(var lat, var lon) async {
     print("getting Place Location");
 
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(lat, lon));
+    List<Placemark> addresses = await placemarkFromCoordinates(lat, lon);
     var first = addresses.first;
-    print("${first.featureName} : ${first.addressLine}");
+    print("${first.street} : ${first.administrativeArea}");
     // placeMark = await Geolocator().placemarkFromCoordinates(lat, lon);
-    var response = await  http
-        .get("https://maps.googleapis.com/maps/api/geocode/json?" +
-        "latlng=$lat,$lon&" +
-        "key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw");
+    var response = await http.get(Uri.parse(
+        "https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lon&key=AIzaSyCaccNxbzwR9tMvkppT7bT7zNKjChc_yAw"
+    ));
     print("hbkjhghjkghghjghjghjk");
     if (response.statusCode == 200) {
       var responseJson = jsonDecode(response.body)["results"];
@@ -531,13 +536,13 @@ class _FullViewOfflineCase extends State<FullViewOfflineCase> {
             : new AlertDialog(
                 content: new Text(msg),
                 actions: [
-                  FlatButton(
+                  TextButton(
                     child: new Text("CANCEL"),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
                   ),
-                  FlatButton(
+                  TextButton(
                     child: new Text("OK"),
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -567,18 +572,17 @@ class _FullViewOfflineCase extends State<FullViewOfflineCase> {
   }
 
   var caseId, caseIdentifier;
-  LocationData _locationData;
+  late LocationData _locationData;
   var countryCaseId;
-  Location location = new Location();
+  location_package.Location location = new location_package.Location();
 
   Future<void> getCaseId(var data) async {
     _locationData = await location.getLocation();
 
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(_locationData.latitude,_locationData.longitude));
-    var first = addresses.first;
-    print("${first.featureName} : ${first.addressLine}");
+    List<Placemark> addresses = await placemarkFromCoordinates(_locationData.latitude!, _locationData.longitude!);    var first = addresses.first;
+    print("${first.street} : ${first.administrativeArea}");
     //List<Placemark> placeMark = await Geolocator().placemarkFromCoordinates(_locationData.latitude,_locationData.longitude);
-    countryCaseId = addresses.first.countryName;
+    countryCaseId = addresses.first.country;
 
 
     CustomResponse response =
@@ -597,7 +601,7 @@ class _FullViewOfflineCase extends State<FullViewOfflineCase> {
       Fluttertoast.showToast(msg: response.body);
   }
 
-  int removeIndex;
+  late int removeIndex;
   var storedValues;
   void setLocalStorage(var data, var postId, var caseDetails) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -621,10 +625,10 @@ class _FullViewOfflineCase extends State<FullViewOfflineCase> {
   }
 
   Future<void> uploadData(var data) async {
-    final coordinates = new Coordinates(1.10, 45.50);
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(_locationData.latitude,_locationData.longitude));
+    // final coordinates = new Coordinates(1.10, 45.50);
+    List<Placemark> addresses = await placemarkFromCoordinates(1.10, 45.50);
     var first = addresses.first;
-    print("${first.featureName} : ${first.addressLine}");
+    print("${first.street} : ${first.administrativeArea}");
 
    // List<Placemark> placeMark = await Geolocator().placemarkFromCoordinates(_locationData.latitude,_locationData.longitude);
 
@@ -644,8 +648,8 @@ class _FullViewOfflineCase extends State<FullViewOfflineCase> {
           "mightbecut": data["mightbecut"],
           "beencut": data["beencut"],
           "havebeencut": data["havebeencut"],
-          "country": first.countryName,
-          "state": first.adminArea,
+          "country": first.country,
+          "state": first.administrativeArea,
           "city": first.locality,
     };
     CustomResponse response = await ApiCall.makePostRequestToken("incident/adddata", paramsData: uploadData);
@@ -668,7 +672,7 @@ class _FullViewOfflineCase extends State<FullViewOfflineCase> {
 
     Map<String,String> data = {'id':id};
 
-    request.headers.addAll({'Content-Type': 'application/form-data', 'x-auth-token': to});
+    request.headers.addAll({'Content-Type': 'application/form-data', 'x-auth-token': to ?? ''});
     request.fields.addAll(data);
 
 

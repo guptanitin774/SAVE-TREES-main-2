@@ -18,7 +18,7 @@ class SaveCaseListLocally {
 
   static Future<String> get _localPath async {
     final directory = await getExternalStorageDirectory();
-    return directory.path;
+    return directory?.path ?? '';
   }
   static Future<Io.File> getImageFromNetwork(String url) async {
     Io.File file = await DefaultCacheManager().getSingleFile(url);
@@ -30,8 +30,10 @@ class SaveCaseListLocally {
     final file = await getImageFromNetwork(url);
     //retrieve local path for device
     var path = await _localPath;
-    Image image = decodeImage(file.readAsBytesSync());
-
+    Image? image = decodeImage(file.readAsBytesSync());
+    if (image == null) {
+      throw Exception("Failed to decode image");
+    }
     // For Image resize & Compression.
     Image thumbnail = copyResize(image,width: 100, height: 100,);
 

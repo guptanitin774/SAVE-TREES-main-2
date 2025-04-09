@@ -292,24 +292,24 @@ class _Notifications extends State<Notifications> {
     readNotification(notificationList[indexVal]["_id"]);
 
     notificationList[indexVal]["type"] == "Discussion" ?
-    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 1,))):
+    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 1, isSearch: true))):
     notificationList[indexVal]["type"] == "Update" ?
-    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 0,))):
+    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 0, isSearch: true))):
 
     notificationList[indexVal]["type"] == "Watchlist" ?
-    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 0,))):
+    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 0, isSearch: true))):
 
     notificationList[indexVal]["type"] == "Onway" ?
-    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 0,))):
+    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 0, isSearch: true))):
 
     notificationList[indexVal]["type"] == "Nearby" ?
-    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 0,))):
+    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 0, isSearch: true))):
 
     notificationList[indexVal]["type"] == "Savedlocation" ?
-    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 0,))):
+    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 0, isSearch: true))):
 
     notificationList[indexVal]["type"] == "Mention" ?
-    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 1,))):
+    await Navigator.push(context, MaterialPageRoute(builder: (context)=>CaseDetailedView(notificationList[indexVal]["incident"],tabValue: 1, isSearch: true))):
 
     notificationList[indexVal]["type"] == "Admin" ?
     CommonWidgets.newAlertBox(context, notificationList[indexVal]["message"]??"", notificationList[indexVal]["title"]??"", leaveThatPage: false):

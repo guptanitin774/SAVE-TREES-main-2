@@ -40,10 +40,10 @@ void _siginOutFireBase() async{
 }
   //New Code
 
-  String phoneNo;
-  String smsOTP;
-  String verificationId;
-  String errorMessage = '';
+  late String phoneNo;
+  late String smsOTP;
+  late String verificationId;
+  late String errorMessage = '';
   FirebaseAuth _auth = FirebaseAuth.instance;
 
 
@@ -53,9 +53,9 @@ void _siginOutFireBase() async{
      textEditingController.clear();
    });
 
-   final PhoneCodeSent codeSent = (String verId, [int forceCodeResend]) {
+   final PhoneCodeSent codeSent = (String verId, [int? forceCodeResend]) {
      this.verificationId = verId;
-   };
+   } as PhoneCodeSent;
 
 
 
@@ -63,8 +63,8 @@ void _siginOutFireBase() async{
      await _auth.verifyPhoneNumber(
          phoneNumber: widget.prefix+" "+widget.phoneNumber,
          timeout: const Duration(seconds: 112),
-         verificationCompleted: (AuthCredential phoneAuthCredential) async{},
-         verificationFailed:   (AuthException e){print("${e.message}");},
+       verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async{},
+       verificationFailed: (FirebaseAuthException e) {print(e.message);},
          codeSent: codeSent,
          codeAutoRetrievalTimeout:  (String verId) {
        this.verificationId = verId;
@@ -84,13 +84,13 @@ void _siginOutFireBase() async{
 
   signIn(BuildContext context) async {
     try {
-      final AuthCredential credential = PhoneAuthProvider.getCredential(verificationId: verificationId, smsCode: smsOTP);
+      final AuthCredential credential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: smsOTP);
 
       final  user = (await _auth.signInWithCredential(credential)).user;
       //print( await user.getIdToken(refresh: false));
 
-      var idToken = await user.getIdToken(refresh: false);
-     print(idToken.token.toString());
+      String? idToken = await user?.getIdToken();
+      print(idToken.toString());
 
       Map data={'phone': widget.phoneNumber,
         "prefix":widget.prefix,
@@ -98,7 +98,7 @@ void _siginOutFireBase() async{
         "state":widget.state,
         "city": widget.city,
         //"otp" :"1234",
-        "token": idToken.token.toString()
+        "token": idToken.toString()
       };
       var response = await ApiCall.makePostRequestToken("user/verifyotp",paramsData: data);
        print(json.decode(response.body));
@@ -110,8 +110,8 @@ void _siginOutFireBase() async{
 
         await LocalPrefManager.setToken(json.decode(response.body)["token"]);
         await LocalPrefManager.setUserId(json.decode(response.body)["id"]);
-        await LocalPrefManager.setAnonymity(true);
-        await LocalPrefManager.setFirebaseToken(idToken.token.toString());
+       await LocalPrefManager.setAnonymity(true);
+       await LocalPrefManager.setFirebaseToken(idToken.toString());
 
 
         if(!json.decode(response.body)["profile"])
@@ -139,9 +139,9 @@ void _siginOutFireBase() async{
 
 
 
-  Timer _timer;
-  int _start ;
-  String sendPin;
+  late Timer _timer;
+  late int _start ;
+  late String sendPin;
 
   void startTimer()  {
     _start = 110;
@@ -248,7 +248,7 @@ bool buttonLoading = false;
                 obscureText: false,
                 // animationType: AnimationType.fade,
                 validator: (v) {
-                  if (v.length < 3) {
+                  if (v!.length < 3) {
                     return null;
                   } else {
                     return null;
@@ -278,7 +278,7 @@ bool buttonLoading = false;
 
                 },
                 beforeTextPaste: (text) {
-                  smsOTP = text;
+                  smsOTP = text!;
                   return true;
                 },
               ),

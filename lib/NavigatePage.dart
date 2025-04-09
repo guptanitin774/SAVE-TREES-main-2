@@ -43,15 +43,15 @@ class _NavigatePage extends State<NavigatePage> {
 
   void _handleMessage(Map<String, dynamic> data) {
     if (data["type"] == "Discussion") {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => CaseDetailedView(data["incident"], tabValue: 1)));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => CaseDetailedView(data["incident"], tabValue: 1, isSearch: true)));
     } else if (data["type"] == "Update" ||
         data["type"] == "Watchlist" ||
         data["type"] == "Onway" ||
         data["type"] == "Nearby" ||
         data["type"] == "Savedlocation") {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => CaseDetailedView(data["incident"], tabValue: 0)));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => CaseDetailedView(data["incident"], tabValue: 0, isSearch: true)));
     } else if (data["type"] == "Mention") {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => CaseDetailedView(data["incident"], tabValue: 1)));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => CaseDetailedView(data["incident"], tabValue: 1, isSearch: true)));
     } else {
       Navigator.push(context, MaterialPageRoute(builder: (context) => BottomNavPage(navigationIndex: 2)));
     }

@@ -220,7 +220,7 @@ class _SimilarCaseDetailedView extends State<SimilarCaseDetailedView> {
                       children: [
                         CaseSummary(
                             navigateController, widget.postCaseId, caseDetails),
-                        CaseDiscussion(caseDetails, token),
+                        CaseDiscussion(caseDetails, token, key: UniqueKey()),
                         CaseGallery(widget.postCaseId, caseDetails),
                       ],
                     )

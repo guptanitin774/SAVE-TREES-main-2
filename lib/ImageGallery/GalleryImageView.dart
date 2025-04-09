@@ -22,8 +22,8 @@ class GalleryImageView extends StatefulWidget{
 }
 
 class _GalleryImageView extends State<GalleryImageView>{
-  PageController _pageController;
-  int pageIndex;
+  late PageController _pageController;
+  late int pageIndex;
 
   @override
   void initState()
@@ -38,7 +38,7 @@ class _GalleryImageView extends State<GalleryImageView>{
   }
 
   var dateFormatter = new DateFormat('dd-MMM-yyyy');
-  bool firstPage, lastPage ;
+  late bool firstPage, lastPage ;
   final textStyle = TextStyle(color: Colors.white, fontWeight: FontWeight.w600);
   final dateStyle = TextStyle(color: Colors.white, fontWeight: FontWeight.w600);
 
@@ -97,18 +97,19 @@ class _GalleryImageView extends State<GalleryImageView>{
                     maxScale: 2.0,
                     gestureDetectorBehavior: HitTestBehavior.opaque,
                     enableRotation: false,
-                    loadingBuilder: (BuildContext context, ImageChunkEvent loadingProgress){
-                      if (loadingProgress == null) return Container();
-                      return Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          backgroundColor: Colors.white54,
-                          valueColor: new AlwaysStoppedAnimation<Color>(Colors.green),
-                          value: loadingProgress.expectedTotalBytes != null ?
-                          loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null,
-                        ),
-                      );
-                    },
+                      loadingBuilder: (BuildContext context, ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null || loadingProgress.expectedTotalBytes == null) {
+                          return Container();
+                        }
+                        return Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            backgroundColor: Colors.white54,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                            value: loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!,
+                          ),
+                        );
+                      },
                   ),
                   Container(
                     decoration: BoxDecoration(
@@ -176,7 +177,7 @@ class _GalleryImageView extends State<GalleryImageView>{
           return Container(
             height: 80.0,
             padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-            child: FlatButton.icon(onPressed: () =>mediaPermission(), icon: Icon(Icons.save_alt, size: 30,),
+            child: TextButton.icon(onPressed: () =>mediaPermission(), icon: Icon(Icons.save_alt, size: 30,),
                 label: Text("Save Photo", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16),)),
 
             // child: InkWell(
